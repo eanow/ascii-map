@@ -1,0 +1,93 @@
+<head>
+<script src="jquery-3.6.3.min.js"></script>
+</head>
+
+<script type="text/javascript">
+draw=0;
+    $(function() {
+        // wrap words in spans
+        $('p.map_pixel').each(function() {
+            var $this = $(this);
+            $this.html($this.text().replace(/(.)/g, "<span>$1</span>"));
+        });
+
+
+$('p.map_pixel span').click(
+function() {$(this).text("G")}
+);
+
+$('p.map_pixel span').mousedown(
+function() {$('#state').text("Down");
+draw=1;
+}
+);
+
+$('p.map_pixel span').mouseup(
+function() {$('#state').text("Up")
+draw=0;
+}
+);
+
+$('p.map_pixel span').hover(
+function() {
+if (draw === 1) {
+$(this).text("G")
+}
+}
+);
+
+    });
+</script>
+
+<style type='text/css'>
+p.map_pixel {
+font-family: monospace;
+line-height: 0em;
+font-size: 30;
+-moz-user-select: -moz-none;
+-khtml-user-select: none;
+-webkit-user-select: none;
+-o-user-select: none;
+user-select: none;
+}
+</style>
+<p></p>
+<p class="map_pixel">0000000000</p>
+<p class="map_pixel">0000000000</p>
+<p class="map_pixel">0000000000</p>
+<p class="map_pixel">0000000000</p>
+<p class="map_pixel">0000000000</p>
+<p class="map_pixel">0000000000</p>
+<p class="map_pixel">0000000000</p>
+<p class="map_pixel">0000000000</p>
+<p class="map_pixel">0000000000</p>
+<p class="map_pixel">0000000000</p>
+
+
+<p>11111</p>
+<p></p>
+State:<span id="state"></span>
+
+<!--
+/*
+<p>Each word will be wrapped in a span.</p>
+<p>A second paragraph here.</p>
+Word: <span id="word"></span>
+
+<script type="text/javascript">
+    $(function() {
+        // wrap words in spans
+        $('p').each(function() {
+            var $this = $(this);
+            $this.html($this.text().replace(/\b(\w+)\b/g, "<span>$1</span>"));
+        });
+
+        // bind to each span
+        $('p span').hover(
+            function() { $('#word').text($(this).css('background-color','#ffff66').text()); },
+            function() { $('#word').text(''); $(this).css('background-color',''); }
+        );
+    });
+</script>
+*/
+-->
