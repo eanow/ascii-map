@@ -4,42 +4,54 @@
 
 <script type="text/javascript">
 draw=0;
-function fresh_map(rows, cols) {
+function fresh_map() {
+    //get input
+    rows=$("#num_rows").val();
+    cols=$("#num_cols").val();
+    
+    //empty the map area
+    $(".map_canvas").empty();
+    //fill with rows worth of p elements
     for(ii=0;ii<rows;ii+=1) {
-        $( ".map_canvas" ).append("<p class=\"map_pixel\">");
+        $( ".map_canvas" ).append("<p class=\"map_pixel\" id=\""+ii+"\">");
     }
+    //fill each p element with cols span elements
     for (jj=0; jj< cols; jj+=1) {
-        $('p.map_pixel').append("<span>0</span>");
+        $('p.map_pixel').append("<span id=\""+jj+"\">0</span>");
     }
     console.log("Creating Fresh Map");
 
-
-
-$('p.map_pixel span').click(
-    function() {$(this).text("G")}
-);
-
-$('p.map_pixel span').mousedown(
-    function() {
-        $('#state').text("Down");
-        draw=1;
-    }
-);
-
-$('p.map_pixel span').mouseup(
-    function() {
-        $('#state').text("Up");
-        draw=0;
-    }
-);
-
-$('p.map_pixel span').hover(
-    function() {
-        if (draw === 1) {
+    $('p.map_pixel span').click(
+        function() {
             $(this).text("G")
+            myCol = $(this).attr("id");
+            myRow = $(this).parent().attr("id");
+            $("#col_display").text(myCol);
+            $("#row_display").text(myRow);
         }
-    }
-);
+    );
+
+    $('p.map_pixel span').mousedown(
+        function() {
+            $('#state').text("Down");
+            draw=1;
+        }
+    );
+
+    $('p.map_pixel span').mouseup(
+        function() {
+            $('#state').text("Up");
+            draw=0;
+        }
+    );
+
+    $('p.map_pixel span').hover(
+        function() {
+            if (draw === 1) {
+                $(this).text("G")
+            }
+        }
+    );
 }
 </script>
 
@@ -57,24 +69,20 @@ user-select: none;
 </style>
 <p></p>
 <div class="map_canvas"></div>
-<!-- 
-    <p class="map_pixel">0000000000</p>
-<p class="map_pixel">0000000000</p>
-<p class="map_pixel">0000000000</p>
-<p class="map_pixel">0000000000</p>
-<p class="map_pixel">0000000000</p>
-<p class="map_pixel">0000000000</p>
-<p class="map_pixel">0000000000</p>
-<p class="map_pixel">0000000000</p>
-<p class="map_pixel">0000000000</p>
-<p class="map_pixel">0000000000</p>
--->
+
 <hr>
-<p class="map_pixel"><span>0</span></p>
+
 <p>11111</p>
 <p></p>
 State:<span id="state"></span>
-<button onclick="fresh_map(8,8)">Click me</button> 
+X:<span id="col_display"></span>
+Y:<span id="row_display"></span>
+<br />
+<label for="num_rows">Rows:</label>
+<input type="number" id="num_rows" name="Rows">
+<label for="num_cols">Columns:</label>
+<input type="number" id="num_cols" name="Cols">
+<button onclick="fresh_map()">Create New Map</button> 
 
 <!--
 /*
