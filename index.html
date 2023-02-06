@@ -4,39 +4,43 @@
 
 <script type="text/javascript">
 draw=0;
-    $(function() {
-        // wrap words in spans
-        $('p.map_pixel').each(function() {
-            var $this = $(this);
-            $this.html($this.text().replace(/(.)/g, "<span>$1</span>"));
-        });
+function fresh_map(rows, cols) {
+    for(ii=0;ii<rows;ii+=1) {
+        $( ".map_canvas" ).append("<p class=\"map_pixel\">");
+    }
+    for (jj=0; jj< cols; jj+=1) {
+        $('p.map_pixel').append("<span>0</span>");
+    }
+    console.log("Creating Fresh Map");
+
 
 
 $('p.map_pixel span').click(
-function() {$(this).text("G")}
+    function() {$(this).text("G")}
 );
 
 $('p.map_pixel span').mousedown(
-function() {$('#state').text("Down");
-draw=1;
-}
+    function() {
+        $('#state').text("Down");
+        draw=1;
+    }
 );
 
 $('p.map_pixel span').mouseup(
-function() {$('#state').text("Up")
-draw=0;
-}
+    function() {
+        $('#state').text("Up");
+        draw=0;
+    }
 );
 
 $('p.map_pixel span').hover(
-function() {
-if (draw === 1) {
-$(this).text("G")
-}
-}
+    function() {
+        if (draw === 1) {
+            $(this).text("G")
+        }
+    }
 );
-
-    });
+}
 </script>
 
 <style type='text/css'>
@@ -52,6 +56,9 @@ user-select: none;
 }
 </style>
 <p></p>
+<div class="map_canvas"></div>
+<!-- 
+    <p class="map_pixel">0000000000</p>
 <p class="map_pixel">0000000000</p>
 <p class="map_pixel">0000000000</p>
 <p class="map_pixel">0000000000</p>
@@ -61,12 +68,13 @@ user-select: none;
 <p class="map_pixel">0000000000</p>
 <p class="map_pixel">0000000000</p>
 <p class="map_pixel">0000000000</p>
-<p class="map_pixel">0000000000</p>
-
-
+-->
+<hr>
+<p class="map_pixel"><span>0</span></p>
 <p>11111</p>
 <p></p>
 State:<span id="state"></span>
+<button onclick="fresh_map(8,8)">Click me</button> 
 
 <!--
 /*
