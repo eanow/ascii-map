@@ -3,7 +3,9 @@
 </head>
 
 <script type="text/javascript">
-draw=0;
+drag="up";
+drag_corner_row=0;
+drag_corner_col=0;
 submap="ground";
 function edit_ground() {
     submap="ground";
@@ -15,20 +17,20 @@ function edit_characters() {
     submap="characters";
 }
 function click_rewrite() {
-    $(this).text("G")
+    $(this).text("X")
     myCol = $(this).attr("id");
     myRow = $(this).parent().attr("id");
     $("#col_display").text(myCol);
     $("#row_display").text(myRow);
     switch(submap) {
         case "ground":
-            $(".ground_map").children("#"+myRow).children("#"+myCol).text("G");
+            $(".ground_map").children("#"+myRow).children("#"+myCol).text("X");
             break;
         case "walls":
-            $(".wall_map").children("#"+myRow).children("#"+myCol).text("G");
+            $(".wall_map").children("#"+myRow).children("#"+myCol).text("X");
             break;
         case "characters":
-            $(".character_map").children("#"+myRow).children("#"+myCol).text("G");
+            $(".character_map").children("#"+myRow).children("#"+myCol).text("X");
             break;
     }
 }
@@ -62,6 +64,14 @@ function fresh_map() {
 
     $('p.map_pixel span').mousedown(
         function() {
+            //functionality will alter based on mode
+            switch(submap) {
+                case "ground":
+                    drag_corner_col = $(this).attr("id");
+                    drag_corner_row = $(this).parent().attr("id");
+                    drag = "down"
+                    break;
+            }
             $('#state').text("Down");
             draw=1;
         }
@@ -69,18 +79,50 @@ function fresh_map() {
 
     $('p.map_pixel span').mouseup(
         function() {
+            //functionality will alter based on mode
+            switch(submap) {
+                case "ground":
+                    myCol = $(this).attr("id");
+                    myRow = $(this).parent().attr("id");
+                    drag = "up";
+                    update_square(drag_corner_col,myCol,drag_corner_row,myRow,"ground");
+                    break;
+            }
             $('#state').text("Up");
             draw=0;
         }
     );
 
-    $('p.map_pixel span').hover(
+    /*$('p.map_pixel span').hover(
         function() {
             if (draw === 1) {
                 $(this).text("G")
             }
         }
-    );
+    );*/
+}
+function update_square(x1, x2, y1, y2, submap) {
+    //swap if first is larger
+    if (x1>x2) {
+        tempX=x1;
+        x1=x2;
+        x2=tempX;
+    }
+    if (y1>y2) {
+        tempY=y1;
+        y1=y2;
+        y2=tempY;
+    }
+    console.log("drawing a square");
+    for (ii=x1; ii<=x2; ii++) {
+        for (jj=y1; jj<=y2; jj++) {
+            switch(submap) {
+                case "ground":
+                $(".ground_map").children("#"+jj).children("#"+ii).text("X");
+                break;
+            }
+        }
+    }
 }
 </script>
 
@@ -102,10 +144,35 @@ user-select: none;
         <div class="map_canvas" style="display: table-cell;">
 
         </div>
-        <div class="palette" style="display: table-cell;">
-            <button onclick="edit_ground()">Ground</button><br />
-            <button onclick="edit_walls()">Walls</button><br />
-            <button onclick="edit_characters()">Actors</button><br />
+        <div class="drawing_palette" style="display: table-cell;"></div>
+            <div style="display: table-row;">
+                <div class="palette_select" style="display: table-cell;">
+                    <button onclick="edit_ground()">Ground</button><br />
+                    <button onclick="edit_walls()">Walls</button><br />
+                    <button onclick="edit_characters()">Actors</button><br />
+                </div>
+            </div>
+            <div style="display: table-row;">
+                <div class="ground_palette" style="display: table-cell;">
+                    <input type="radio" name="ground_material" value="ground_dirt" id="ground_dirt">
+                    <label for="ground_dirt">Dirt</label>
+                    <br />
+                    <input type="radio" name="ground_material" value="ground_grass" id="ground_grass">
+                    <label for="ground_grass">Grass</label>
+                    <br />
+                    <input type="radio" name="ground_material" value="ground_rock" id="ground_rock">
+                    <label for="ground_rock">Rocky</label>
+                    <br />
+                    <input type="radio" name="ground_material" value="ground_water" id="ground_water">
+                    <label for="ground_water">Water</label>
+                    <br />
+                    <input type="radio" name="ground_material" value="ground_tile" id="ground_tile">
+                    <label for="ground_tile">Tile/Finished Stone</label>
+                    <br />
+                    <input type="radio" name="ground_material" value="ground_wood" id="ground_wood">
+                    <label for="ground_wood">Wooden</label>
+                </div>
+            </div>
         </div>
     </div>
 </div>
