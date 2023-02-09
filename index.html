@@ -7,12 +7,16 @@ let drag="up";
 let drag_corner_row=0;
 let drag_corner_col=0;
 let submap="ground";
+let picked=null;
+let draw=0;
+const empty_tile='█';
+
 function current_marker() {
     let rval="0";
     //base on palette
     switch(submap) {
         case "ground":
-            let picked = $('input[name="ground_material"]:checked').val();
+            picked = $('input[name="ground_material"]:checked').val();
             console.log(picked);
             switch(picked) {
                 case "ground_dirt":
@@ -35,20 +39,58 @@ function current_marker() {
                     break;
             }
             break;
+        case "wall":
+            picked = $('input[name="wall_material"]:checked').val();
+            console.log(picked);
+            switch(picked) {
+                case "wall_constructed":
+                    rval='W';
+                    break;
+                case "wall_natural":
+                    rval='N';
+                    break;
+                case "wall_terrain":
+                    rval='T';
+                    break;
+                case "wall_door":
+                    rval='D';
+                    break;   
+            }
+            break;
+        case "actor":
+            picked = $('input[name="actor_token"]:checked').val();
+            console.log(picked);
+            switch(picked) {
+                case "actor_player":
+                    rval='P';
+                    break;
+                case "actor_monster":
+                    rval='M';
+                    break; 
+            }
+            break;
     }
     return rval;
 }
 function edit_ground() {
     submap="ground";
+    $("#ground_palette").css('visibility', 'visible');
+    $("#wall_palette").css('visibility', 'hidden');
+    $("#actor_palette").css('visibility', 'hidden');
 }
-function edit_walls() {
-    submap="walls";
+function edit_wall() {
+    submap="wall";
+    $("#ground_palette").css('visibility', 'hidden');
+    $("#wall_palette").css('visibility', 'visible');
+    $("#actor_palette").css('visibility', 'hidden');
 }
-function edit_characters() {
-    submap="characters";
+function edit_actor() {
+    submap="actor";
+    $("#ground_palette").css('visibility', 'hidden');
+    $("#wall_palette").css('visibility', 'hidden');
+    $("#actor_palette").css('visibility', 'visible');
 }
 function click_rewrite() {
-    $(this).text("X")
     let myCol = $(this).attr("id");
     let myRow = $(this).parent().attr("id");
     $("#col_display").text(myCol);
@@ -58,11 +100,11 @@ function click_rewrite() {
         case "ground":
             $(".ground_map").children("#"+myRow).children("#"+myCol).text(paint);
             break;
-        case "walls":
+        /*case "wall":
             $(".wall_map").children("#"+myRow).children("#"+myCol).text(paint);
-            break;
-        case "characters":
-            $(".character_map").children("#"+myRow).children("#"+myCol).text(paint);
+            break;*/
+        case "actor":
+            $(".actor_map").children("#"+myRow).children("#"+myCol).text(paint);
             break;
     }
 }
@@ -76,17 +118,17 @@ function fresh_map() {
     //empty the holders
     $(".ground_map").empty();
     $(".wall_map").empty();
-    $(".character_map").empty();
+    $(".actor_map").empty();
     //fill with rows worth of p elements
     for(ii=0;ii<rows;ii+=1) {
         $( ".map_canvas" ).append("<p class=\"map_pixel\" id=\""+ii+"\"></p>");
         $( ".ground_map" ).append("<p class=\"map_pixel\" id=\""+ii+"\"></p>");
         $( ".wall_map" ).append("<p class=\"map_pixel\" id=\""+ii+"\"></p>");
-        $( ".character_map" ).append("<p class=\"map_pixel\" id=\""+ii+"\"></p>");
+        $( ".actor_map" ).append("<p class=\"map_pixel\" id=\""+ii+"\"></p>");
     }
     //fill each p element with cols span elements
     for (jj=0; jj< cols; jj+=1) {
-        $('p.map_pixel').append("<span id=\""+jj+"\">0</span>");
+        $('p.map_pixel').append("<span id=\""+jj+"\">"+empty_tile+"</span>");
     }
     console.log("Creating Fresh Map");
 
@@ -102,6 +144,12 @@ function fresh_map() {
                     drag_corner_col = $(this).attr("id");
                     drag_corner_row = $(this).parent().attr("id");
                     drag = "down"
+                    break;
+                case "wall":
+                    let paint=current_marker();
+                    let myCol = $(this).attr("id");
+                    let myRow = $(this).parent().attr("id");
+                    $(".wall_map").children("#"+myRow).children("#"+myCol).text(paint);  
                     break;
             }
             $('#state').text("Down");
@@ -125,13 +173,22 @@ function fresh_map() {
         }
     );
 
-    /*$('p.map_pixel span').hover(
+    $('p.map_pixel span').hover(
         function() {
             if (draw === 1) {
-                $(this).text("G")
+                switch(submap) {
+                    case "wall":
+                        let paint=current_marker();
+                        {
+                            let myCol = $(this).attr("id");
+                            let myRow = $(this).parent().attr("id");
+                            $(".wall_map").children("#"+myRow).children("#"+myCol).text(paint);
+                        }
+                    break;
+                }
             }
         }
-    );*/
+    );
 }
 function update_square(x1, x2, y1, y2, submap) {
     //swap if first is larger
@@ -181,13 +238,13 @@ user-select: none;
             <div style="display: table-row;">
                 <div class="palette_select" style="display: table-cell;">
                     <button onclick="edit_ground()">Ground</button><br />
-                    <button onclick="edit_walls()">Walls</button><br />
-                    <button onclick="edit_characters()">Actors</button><br />
+                    <button onclick="edit_wall()">Walls</button><br />
+                    <button onclick="edit_actor()">Actors</button><br />
                 </div>
             </div>
-            <div style="display: table-row;">
-                <!-- palette for ground; stuff like dirt, grass, interior tile, etc -->
-                <div class="ground_palette" style="display: table-cell;">
+            <!-- palette for ground; stuff like dirt, grass, interior tile, etc -->
+            <div style="display: table-row; visibility: visible;" id="ground_palette">
+                <div style="display: table-cell;">
                     <input type="radio" name="ground_material" value="ground_dirt" id="ground_dirt" checked>
                     <label for="ground_dirt">Dirt</label>
                     <br />
@@ -205,6 +262,34 @@ user-select: none;
                     <br />
                     <input type="radio" name="ground_material" value="ground_wood" id="ground_wood">
                     <label for="ground_wood">Wooden</label>
+                </div>
+            </div>
+            <!-- palette for walls -->
+            <div style="display: table-row; visibility: hidden;" id="wall_palette">
+                <div style="display: table-cell;">
+                    <input type="radio" name="wall_material" value="wall_constructed" id="wall_constructed" checked>
+                    <label for="wall_constructed">Constructed Wall</label>
+                    <br />
+                    <input type="radio" name="wall_material" value="wall_natural" id="wall_natural">
+                    <label for="wall_natural">Natural Wall</label>
+                    <br />
+                    <input type="radio" name="wall_material" value="wall_terrain" id="wall_terrain">
+                    <label for="wall_terrain">Terrain Obstactle</label>
+                    <br />
+                    <input type="radio" name="wall_material" value="wall_door" id="wall_door">
+                    <label for="wall_door">Door</label>
+                    <br />
+                </div>
+            </div>
+            <!-- palette for actors -->
+            <div style="display: table-row; visibility: hidden;" id="actor_palette">
+                <div style="display: table-cell;">
+                    <input type="radio" name="actor_token" value="actor_player" id="wall_constructed" checked>
+                    <label for="actor_player">Player Character</label>
+                    <br />
+                    <input type="radio" name="actor_token" value="actor_monster" id="wall_natural">
+                    <label for="actor_monster">Monster</label>
+                    <br />
                 </div>
             </div>
         </div>
@@ -234,29 +319,6 @@ Y:<span id="row_display"></span>
         <div style="width: 10px; display: table-cell;"></div>
         <div class="wall_map" style="display: table-cell;"></div>
         <div style="width: 10px; display: table-cell;"></div>
-        <div class="character_map" style="display: table-cell;"></div>
+        <div class="actor_map" style="display: table-cell;"></div>
     </div>
 </div>
-<!--
-/*
-<p>Each word will be wrapped in a span.</p>
-<p>A second paragraph here.</p>
-Word: <span id="word"></span>
-
-<script type="text/javascript">
-    $(function() {
-        // wrap words in spans
-        $('p').each(function() {
-            var $this = $(this);
-            $this.html($this.text().replace(/\b(\w+)\b/g, "<span>$1</span>"));
-        });
-
-        // bind to each span
-        $('p span').hover(
-            function() { $('#word').text($(this).css('background-color','#ffff66').text()); },
-            function() { $('#word').text(''); $(this).css('background-color',''); }
-        );
-    });
-</script>
-*/
--->
