@@ -3,10 +3,41 @@
 </head>
 
 <script type="text/javascript">
-drag="up";
-drag_corner_row=0;
-drag_corner_col=0;
-submap="ground";
+let drag="up";
+let drag_corner_row=0;
+let drag_corner_col=0;
+let submap="ground";
+function current_marker() {
+    let rval="0";
+    //base on palette
+    switch(submap) {
+        case "ground":
+            let picked = $('input[name="ground_material"]:checked').val();
+            console.log(picked);
+            switch(picked) {
+                case "ground_dirt":
+                    rval='D';
+                    break;
+                case "ground_grass":
+                    rval='G';
+                    break;
+                case "ground_rock":
+                    rval='R';
+                    break;
+                case "ground_water":
+                    rval='W';
+                    break;
+                case "ground_tile":
+                    rval='T';
+                    break;
+                case "ground_wood":
+                    rval='H';
+                    break;
+            }
+            break;
+    }
+    return rval;
+}
 function edit_ground() {
     submap="ground";
 }
@@ -18,19 +49,20 @@ function edit_characters() {
 }
 function click_rewrite() {
     $(this).text("X")
-    myCol = $(this).attr("id");
-    myRow = $(this).parent().attr("id");
+    let myCol = $(this).attr("id");
+    let myRow = $(this).parent().attr("id");
     $("#col_display").text(myCol);
     $("#row_display").text(myRow);
+    let paint=current_marker();
     switch(submap) {
         case "ground":
-            $(".ground_map").children("#"+myRow).children("#"+myCol).text("X");
+            $(".ground_map").children("#"+myRow).children("#"+myCol).text(paint);
             break;
         case "walls":
-            $(".wall_map").children("#"+myRow).children("#"+myCol).text("X");
+            $(".wall_map").children("#"+myRow).children("#"+myCol).text(paint);
             break;
         case "characters":
-            $(".character_map").children("#"+myRow).children("#"+myCol).text("X");
+            $(".character_map").children("#"+myRow).children("#"+myCol).text(paint);
             break;
     }
 }
@@ -114,12 +146,13 @@ function update_square(x1, x2, y1, y2, submap) {
         y2=tempY;
     }
     console.log("drawing a square");
+    let paint=current_marker();
     for (ii=x1; ii<=x2; ii++) {
         for (jj=y1; jj<=y2; jj++) {
             switch(submap) {
                 case "ground":
-                $(".ground_map").children("#"+jj).children("#"+ii).text("X");
-                break;
+                    $(".ground_map").children("#"+jj).children("#"+ii).text(paint);
+                    break;
             }
         }
     }
@@ -153,8 +186,9 @@ user-select: none;
                 </div>
             </div>
             <div style="display: table-row;">
+                <!-- palette for ground; stuff like dirt, grass, interior tile, etc -->
                 <div class="ground_palette" style="display: table-cell;">
-                    <input type="radio" name="ground_material" value="ground_dirt" id="ground_dirt">
+                    <input type="radio" name="ground_material" value="ground_dirt" id="ground_dirt" checked>
                     <label for="ground_dirt">Dirt</label>
                     <br />
                     <input type="radio" name="ground_material" value="ground_grass" id="ground_grass">
