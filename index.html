@@ -9,7 +9,52 @@ let drag_corner_col=0;
 let submap="ground";
 let picked=null;
 let draw=0;
+let map_rows=0;
+let map_cols=0;
 const empty_tile='█';
+
+const map_mapping={
+    "ground": {
+        "D": ['.',',',':',';','∙'],
+        "G": ['"','‟','‘'],
+        "R": ["o",'°','σ','Ω'],
+        "W": ["≈",'~'],
+        "T": ["#"],
+        "H": ["-"],
+    },
+    "wall": {
+        "W": ["╬"],
+        "N": [")"],
+        "T": ["O"],
+        "D": ["∩"],
+    },
+    "actor": {
+        "P": ["P"],
+        "M": ["M"],
+    }
+}
+
+function synthesize_map() {
+    //create a combined map by merging all layers
+    let line="";
+    $("#clip_area").val("");
+    for (let ii=0; ii<map_rows; ii+=1) {
+        line="";
+        for (let jj=0; jj<map_cols; jj+=1) {
+            reference=$(".ground_map").children("#"+ii).children("#"+jj).text();
+            symbol_set=map_mapping.ground[reference];
+            paint=symbol_set[(Math.random() * symbol_set.length) | 0];
+            $(".map_canvas").children("#"+ii).children("#"+jj).text(paint);
+            line=line+paint;
+        }
+        if (ii===0) {
+            update_clip=$("#clip_area").val()+line;
+        } else {
+            update_clip=$("#clip_area").val()+"\n"+line;
+        }
+        $("#clip_area").val(update_clip);
+    }
+}
 
 function current_marker() {
     let rval="0";
@@ -97,9 +142,9 @@ function click_rewrite() {
     $("#row_display").text(myRow);
     let paint=current_marker();
     switch(submap) {
-        case "ground":
+        /*case "ground":
             $(".ground_map").children("#"+myRow).children("#"+myCol).text(paint);
-            break;
+            break;*/
         /*case "wall":
             $(".wall_map").children("#"+myRow).children("#"+myCol).text(paint);
             break;*/
@@ -110,26 +155,28 @@ function click_rewrite() {
 }
 function fresh_map() {
     //get input
-    rows=$("#num_rows").val();
-    cols=$("#num_cols").val();
-    
+    map_rows=$("#num_rows").val();
+    map_cols=$("#num_cols").val();
+    $("#clip_area").val("");
     //empty the map area
     $(".map_canvas").empty();
     //empty the holders
     $(".ground_map").empty();
     $(".wall_map").empty();
     $(".actor_map").empty();
-    //fill with rows worth of p elements
-    for(ii=0;ii<rows;ii+=1) {
+    //fill with map_rows worth of p elements
+    for(let ii=0; ii<map_rows; ii+=1) {
         $( ".map_canvas" ).append("<p class=\"map_pixel\" id=\""+ii+"\"></p>");
         $( ".ground_map" ).append("<p class=\"map_pixel\" id=\""+ii+"\"></p>");
         $( ".wall_map" ).append("<p class=\"map_pixel\" id=\""+ii+"\"></p>");
         $( ".actor_map" ).append("<p class=\"map_pixel\" id=\""+ii+"\"></p>");
     }
-    //fill each p element with cols span elements
-    for (jj=0; jj< cols; jj+=1) {
+    //fill each p element with map_cols span elements
+    for (let jj=0; jj<map_cols; jj+=1) {
         $('p.map_pixel').append("<span id=\""+jj+"\">"+empty_tile+"</span>");
     }
+    //start will a full dirt ground
+    update_square(0,map_cols,0,map_rows,"ground");
     console.log("Creating Fresh Map");
 
     $('p.map_pixel span').click(
@@ -166,6 +213,7 @@ function fresh_map() {
                     myRow = $(this).parent().attr("id");
                     drag = "up";
                     update_square(drag_corner_col,myCol,drag_corner_row,myRow,"ground");
+                    synthesize_map();
                     break;
             }
             $('#state').text("Up");
@@ -311,6 +359,7 @@ Y:<span id="row_display"></span>
 <label for="num_cols">Columns:</label>
 <input type="number" id="num_cols" name="Cols">
 <button onclick="fresh_map()">Create New Map</button> 
+<button onclick="synthesize_map()">Merge Map</button>
 <br />
 <!--holder maps-->
 <div style="display: table;">
@@ -322,3 +371,6 @@ Y:<span id="row_display"></span>
         <div class="actor_map" style="display: table-cell;"></div>
     </div>
 </div>
+<!--copypasta area-->
+<textarea id="clip_area">
+</textarea>
