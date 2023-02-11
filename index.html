@@ -16,10 +16,10 @@ const empty_tile='█';
 const map_mapping={
     "ground": {
         "D": ['.',',',':',';','∙'],
-        "G": ['"','‟','‘'],
-        "R": ["o",'°','σ','Ω'],
+        "G": ['"','‟','‘','`'],
+        "R": ["ە",'°','σ','Ω','ߋ','ߘ'],
         "W": ["≈",'~'],
-        "T": ["#"],
+        "T": ["+"],
         "H": ["-"],
     },
     "wall": {
@@ -240,20 +240,25 @@ function fresh_map() {
 }
 function update_square(x1, x2, y1, y2, submap) {
     //swap if first is larger
-    if (x1>x2) {
-        tempX=x1;
-        x1=x2;
-        x2=tempX;
+    if (parseInt(x1,10)>parseInt(x2,10)) {
+        drawX1=parseInt(x2,10);
+        drawX2=parseInt(x1,10);
+    } else {
+        drawX1=parseInt(x1,10);
+        drawX2=parseInt(x2,10);
     }
-    if (y1>y2) {
-        tempY=y1;
-        y1=y2;
-        y2=tempY;
+    if (parseInt(y1,10)>parseInt(y2,10)) {
+        drawY1=parseInt(y2,10);
+        drawY2=parseInt(y1,10);
+    } else {
+        drawY1=parseInt(y1,10);
+        drawY2=parseInt(y2,10);
     }
     console.log("drawing a square");
+    console.log(drawX1+" "+drawX2+" "+drawY1+" "+drawY2)
     let paint=current_marker();
-    for (ii=x1; ii<=x2; ii++) {
-        for (jj=y1; jj<=y2; jj++) {
+    for (ii=drawX1; ii<=drawX2; ii++) {
+        for (jj=drawY1; jj<=drawY2; jj++) {
             switch(submap) {
                 case "ground":
                     $(".ground_map").children("#"+jj).children("#"+ii).text(paint);
