@@ -37,12 +37,30 @@ const map_mapping={
 function synthesize_map() {
     //create a combined map by merging all layers
     let line="";
+    let symbol_set=null;
     $("#clip_area").val("");
     for (let ii=0; ii<map_rows; ii+=1) {
         line="";
         for (let jj=0; jj<map_cols; jj+=1) {
-            reference=$(".ground_map").children("#"+ii).children("#"+jj).text();
-            symbol_set=map_mapping.ground[reference];
+            ground_layer=$(".ground_map").children("#"+ii).children("#"+jj).text();
+            wall_layer=$(".wall_map").children("#"+ii).children("#"+jj).text();
+            actor_layer=$(".actor_map").children("#"+ii).children("#"+jj).text();
+            temp_layer=$(".temp_map").children("#"+ii).children("#"+jj).text();
+            symbol_set=map_mapping.ground[ground_layer];
+            console.log("using ground");
+            //Temp > actors > wall > ground, assuming not empty tile
+            if (wall_layer !== empty_tile) {
+                symbol_set=map_mapping.wall[wall_layer];
+                console.log("using Wall");
+            }
+            if (actor_layer !== empty_tile) {
+                symbol_set=map_mapping.actor[actor_layer];
+                console.log("using actor");
+            }
+            if (temp_layer !== empty_tile) {
+                symbol_set=map_mapping.ground[temp_layer];
+                console.log("using character");
+            }
             paint=symbol_set[(Math.random() * symbol_set.length) | 0];
             $(".map_canvas").children("#"+ii).children("#"+jj).text(paint);
             line=line+paint;
@@ -153,10 +171,21 @@ function click_rewrite() {
             break;
     }
 }
+function clear_map(submap) {
+    for (let ii = 0; ii < map_cols; ii+=1) {
+        for (let jj= 0; jj < map_rows; jj+=1) {
+            switch (submap) {
+                case "temp":
+                    $(".temp_map").children("#"+jj).children("#"+ii).text(empty_tile);
+                    break;
+            }
+        }
+    }
+}
 function fresh_map() {
     //get input
-    map_rows=$("#num_rows").val();
-    map_cols=$("#num_cols").val();
+    map_rows=parseInt($("#num_rows").val(),10);
+    map_cols=parseInt($("#num_cols").val(),10);
     $("#clip_area").val("");
     //empty the map area
     $(".map_canvas").empty();
@@ -164,9 +193,11 @@ function fresh_map() {
     $(".ground_map").empty();
     $(".wall_map").empty();
     $(".actor_map").empty();
+    $(".temp_map").empty();
     //fill with map_rows worth of p elements
     for(let ii=0; ii<map_rows; ii+=1) {
         $( ".map_canvas" ).append("<p class=\"map_pixel\" id=\""+ii+"\"></p>");
+        $( ".temp_map").append("<p class=\"map_pixel\" id=\""+ii+"\"></p>");
         $( ".ground_map" ).append("<p class=\"map_pixel\" id=\""+ii+"\"></p>");
         $( ".wall_map" ).append("<p class=\"map_pixel\" id=\""+ii+"\"></p>");
         $( ".actor_map" ).append("<p class=\"map_pixel\" id=\""+ii+"\"></p>");
@@ -224,15 +255,17 @@ function fresh_map() {
     $('p.map_pixel span').hover(
         function() {
             if (draw === 1) {
+                let myCol = $(this).attr("id");
+                let myRow = $(this).parent().attr("id");
+                let paint=current_marker();
                 switch(submap) {
                     case "wall":
-                        let paint=current_marker();
-                        {
-                            let myCol = $(this).attr("id");
-                            let myRow = $(this).parent().attr("id");
-                            $(".wall_map").children("#"+myRow).children("#"+myCol).text(paint);
-                        }
+                        $(".wall_map").children("#"+myRow).children("#"+myCol).text(paint);
                     break;
+                    case "ground":
+                        clear_map("temp");
+                        update_square(drag_corner_col,myCol,drag_corner_row,myRow,"temp");
+                        synthesize_map();
                 }
             }
         }
@@ -262,6 +295,9 @@ function update_square(x1, x2, y1, y2, submap) {
             switch(submap) {
                 case "ground":
                     $(".ground_map").children("#"+jj).children("#"+ii).text(paint);
+                    break;
+                case "temp":
+                    $(".temp_map").children("#"+jj).children("#"+ii).text(paint);
                     break;
             }
         }
@@ -369,6 +405,8 @@ Y:<span id="row_display"></span>
 <!--holder maps-->
 <div style="display: table;">
     <div style="display: table-row;"></div>
+        <div class="temp_map" style="display: table-cell;"></div>
+        <div style="width: 10px; display: table-cell;"></div>
         <div class="ground_map" style="display: table-cell;"></div>
         <div style="width: 10px; display: table-cell;"></div>
         <div class="wall_map" style="display: table-cell;"></div>
