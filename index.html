@@ -184,11 +184,15 @@ function clear_map(submap) {
 }
 function fresh_map() {
     //get input
-    map_rows=parseInt($("#num_rows").val(),10);
-    map_cols=parseInt($("#num_cols").val(),10);
-    $("#clip_area").val("");
+    //map_rows=parseInt($("#num_rows").val(),10);
+    map_rows=parseInt(document.getElementById("num_rows").value,10);
+    //map_cols=parseInt($("#num_cols").val(),10);
+    map_cols=parseInt(document.getElementById("num_cols").value,10);
+    document.getElementById("clip_area").textContent="";
+    //$("#clip_area").val("");
     //empty the map area
-    $(".map_canvas").empty();
+    document.getElementById("map_canvas").replaceChildren();
+    //$(".map_canvas").empty();
     //empty the holders
     $(".ground_map").empty();
     $(".wall_map").empty();
@@ -324,7 +328,7 @@ user-select: none;
 <p></p>
 <div style="width: 100%; display:table;">
     <div style="display: table-row;">
-        <div class="map_canvas" style="display: table-cell; width: 5%; margin:10;">
+        <div class="map_canvas" id="map_canvas" style="display: table-cell; width: 5%; margin:10;">
 
         </div>
         <div class="drawing_palette" style="display: table-cell; width: auto; float:left;margin:10;"></div>
