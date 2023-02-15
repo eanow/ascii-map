@@ -209,6 +209,7 @@ function fresh_map() {
     //start will a full dirt ground
     update_square(0,map_cols,0,map_rows,"ground");
     console.log("Creating Fresh Map");
+    synthesize_map();
 
     $('p.map_pixel span').click(
         click_rewrite
@@ -227,7 +228,8 @@ function fresh_map() {
                     let paint=current_marker();
                     let myCol = $(this).attr("id");
                     let myRow = $(this).parent().attr("id");
-                    $(".wall_map").children("#"+myRow).children("#"+myCol).text(paint);  
+                    $(".wall_map").children("#"+myRow).children("#"+myCol).text(paint);
+                    synthesize_map();  
                     break;
             }
             $('#state').text("Down");
@@ -261,11 +263,13 @@ function fresh_map() {
                 switch(submap) {
                     case "wall":
                         $(".wall_map").children("#"+myRow).children("#"+myCol).text(paint);
+                        synthesize_map();
                     break;
                     case "ground":
                         clear_map("temp");
                         update_square(drag_corner_col,myCol,drag_corner_row,myRow,"temp");
                         synthesize_map();
+                    break;
                 }
             }
         }
