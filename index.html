@@ -189,22 +189,29 @@ function fresh_map() {
     //map_cols=parseInt($("#num_cols").val(),10);
     map_cols=parseInt(document.getElementById("num_cols").value,10);
     document.getElementById("clip_area").textContent="";
-    //$("#clip_area").val("");
     //empty the map area
     document.getElementById("map_canvas").replaceChildren();
-    //$(".map_canvas").empty();
     //empty the holders
-    $(".ground_map").empty();
-    $(".wall_map").empty();
-    $(".actor_map").empty();
-    $(".temp_map").empty();
+    document.getElementById("ground_map").replaceChildren();
+    document.getElementById("wall_map").replaceChildren();
+    document.getElementById("actor_map").replaceChildren();
+    document.getElementById("temp_map").replaceChildren();
     //fill with map_rows worth of p elements
     for(let ii=0; ii<map_rows; ii+=1) {
-        $( ".map_canvas" ).append("<p class=\"map_pixel\" id=\""+ii+"\"></p>");
-        $( ".temp_map").append("<p class=\"map_pixel\" id=\""+ii+"\"></p>");
-        $( ".ground_map" ).append("<p class=\"map_pixel\" id=\""+ii+"\"></p>");
-        $( ".wall_map" ).append("<p class=\"map_pixel\" id=\""+ii+"\"></p>");
-        $( ".actor_map" ).append("<p class=\"map_pixel\" id=\""+ii+"\"></p>");
+        let new_row=document.createElement("p");
+        new_row.id=ii;
+        new_row.className="map_pixel";
+        //let new_row="<p class=\"map_pixel\" id=\""+ii+"\"></p>";
+        document.getElementById("ground_map").append(new_row.cloneNode(true));
+        document.getElementById("temp_map").append(new_row.cloneNode(true));
+        document.getElementById("wall_map").append(new_row.cloneNode(true));
+        document.getElementById("actor_map").append(new_row.cloneNode(true));
+        document.getElementById("map_canvas").append(new_row.cloneNode(true));
+        //$( ".map_canvas" ).append("<p class=\"map_pixel\" id=\""+ii+"\"></p>");
+        //$( ".temp_map").append("<p class=\"map_pixel\" id=\""+ii+"\"></p>");
+        //$( ".ground_map" ).append("<p class=\"map_pixel\" id=\""+ii+"\"></p>");
+        //$( ".wall_map" ).append("<p class=\"map_pixel\" id=\""+ii+"\"></p>");
+        //$( ".actor_map" ).append("<p class=\"map_pixel\" id=\""+ii+"\"></p>");
     }
     //fill each p element with map_cols span elements
     for (let jj=0; jj<map_cols; jj+=1) {
@@ -413,13 +420,13 @@ Y:<span id="row_display"></span>
 <!--holder maps-->
 <div style="display: table;">
     <div style="display: table-row;"></div>
-        <div class="temp_map" style="display: table-cell;"></div>
+        <div class="temp_map" id="temp_map" style="display: table-cell;"></div>
         <div style="width: 10px; display: table-cell;"></div>
-        <div class="ground_map" style="display: table-cell;"></div>
+        <div class="ground_map" id="ground_map" style="display: table-cell;"></div>
         <div style="width: 10px; display: table-cell;"></div>
-        <div class="wall_map" style="display: table-cell;"></div>
+        <div class="wall_map" id="wall_map" style="display: table-cell;"></div>
         <div style="width: 10px; display: table-cell;"></div>
-        <div class="actor_map" style="display: table-cell;"></div>
+        <div class="actor_map" id="actor_map" style="display: table-cell;"></div>
     </div>
 </div>
 <!--copypasta area-->
