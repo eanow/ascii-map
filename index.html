@@ -201,17 +201,11 @@ function fresh_map() {
         let new_row=document.createElement("p");
         new_row.id=ii;
         new_row.className="map_pixel";
-        //let new_row="<p class=\"map_pixel\" id=\""+ii+"\"></p>";
         document.getElementById("ground_map").append(new_row.cloneNode(true));
         document.getElementById("temp_map").append(new_row.cloneNode(true));
         document.getElementById("wall_map").append(new_row.cloneNode(true));
         document.getElementById("actor_map").append(new_row.cloneNode(true));
         document.getElementById("map_canvas").append(new_row.cloneNode(true));
-        //$( ".map_canvas" ).append("<p class=\"map_pixel\" id=\""+ii+"\"></p>");
-        //$( ".temp_map").append("<p class=\"map_pixel\" id=\""+ii+"\"></p>");
-        //$( ".ground_map" ).append("<p class=\"map_pixel\" id=\""+ii+"\"></p>");
-        //$( ".wall_map" ).append("<p class=\"map_pixel\" id=\""+ii+"\"></p>");
-        //$( ".actor_map" ).append("<p class=\"map_pixel\" id=\""+ii+"\"></p>");
     }
     //fill each p element with map_cols span elements
     for (let jj=0; jj<map_cols; jj+=1) {
