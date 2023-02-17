@@ -156,15 +156,17 @@ function edit_actor() {
     document.getElementById("wall_palette").style.visibility='hidden';
     document.getElementById("actor_palette").style.visibility='visible';
 }
-function click_rewrite() {
-    let myCol = $(this).attr("id");
-    let myRow = $(this).parent().attr("id");
+function click_rewrite(event) {
+    let myCol = event.target.id.split("_")[3];
+    let myRow = event.target.id.split("_")[2];
+    //let myCol = $(this).attr("id");
+    //let myRow = $(this).parent().attr("id");
     $("#col_display").text(myCol);
     $("#row_display").text(myRow);
     let paint=current_marker();
     switch(submap) {
         case "actor":
-            let coords="actor_map_"+ii+"_"+jj;
+            let coords=event.target.id;
             document.getElementById(coords).textContent=paint;
             break;
     }
