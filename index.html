@@ -43,10 +43,11 @@ function synthesize_map() {
     for (let ii=0; ii<map_rows; ii+=1) {
         line="";
         for (let jj=0; jj<map_cols; jj+=1) {
-            ground_layer=$(".ground_map").children("#"+ii).children("#"+jj).text();
-            wall_layer=$(".wall_map").children("#"+ii).children("#"+jj).text();
-            actor_layer=$(".actor_map").children("#"+ii).children("#"+jj).text();
-            temp_layer=$(".temp_map").children("#"+ii).children("#"+jj).text();
+            let coord_tail="_"+ii+"_"+jj;
+            ground_layer=document.getElementById("ground_map"+coord_tail).textContent;
+            wall_layer=document.getElementById("wall_map"+coord_tail).textContent;
+            actor_layer=document.getElementById("actor_map"+coord_tail).textContent;
+            temp_layer=document.getElementById("temp_map"+coord_tail).textContent;
             symbol_set=map_mapping.ground[ground_layer];
             console.log("using ground");
             //Temp > actors > wall > ground, assuming not empty tile
@@ -63,7 +64,8 @@ function synthesize_map() {
                 console.log("using character");
             }
             paint=symbol_set[(Math.random() * symbol_set.length) | 0];
-            $(".map_canvas").children("#"+ii).children("#"+jj).text(paint);
+            document.getElementById("map_canvas"+coord_tail).textContent=paint;
+            //$(".map_canvas").children("#"+ii).children("#"+jj).text(paint);
             line=line+paint;
         }
         if (ii===0) {
@@ -81,7 +83,7 @@ function current_marker() {
     switch(submap) {
         case "ground":
             picked = $('input[name="ground_material"]:checked').val();
-            console.log(picked);
+            console.log("current_marker: "+picked+ " selected");
             switch(picked) {
                 case "ground_dirt":
                     rval='D';
@@ -105,7 +107,7 @@ function current_marker() {
             break;
         case "wall":
             picked = $('input[name="wall_material"]:checked').val();
-            console.log(picked);
+            console.log("current_marker: "+picked+ " selected");
             switch(picked) {
                 case "wall_constructed":
                     rval='W';
@@ -123,7 +125,7 @@ function current_marker() {
             break;
         case "actor":
             picked = $('input[name="actor_token"]:checked').val();
-            console.log(picked);
+            console.log("current_marker: "+picked+ " selected");
             switch(picked) {
                 case "actor_player":
                     rval='P';
@@ -139,21 +141,20 @@ function current_marker() {
 function edit_ground() {
     submap="ground";
     document.getElementById("ground_palette").style.visibility='visible';
-    //$("#ground_palette").css('visibility', 'visible');
-    $("#wall_palette").css('visibility', 'hidden');
-    $("#actor_palette").css('visibility', 'hidden');
+    document.getElementById("wall_palette").style.visibility='hidden';
+    document.getElementById("actor_palette").style.visibility='hidden';
 }
 function edit_wall() {
     submap="wall";
-    $("#ground_palette").css('visibility', 'hidden');
-    $("#wall_palette").css('visibility', 'visible');
-    $("#actor_palette").css('visibility', 'hidden');
+    document.getElementById("ground_palette").style.visibility='hidden';
+    document.getElementById("wall_palette").style.visibility='visible';
+    document.getElementById("actor_palette").style.visibility='hidden';
 }
 function edit_actor() {
     submap="actor";
-    $("#ground_palette").css('visibility', 'hidden');
-    $("#wall_palette").css('visibility', 'hidden');
-    $("#actor_palette").css('visibility', 'visible');
+    document.getElementById("ground_palette").style.visibility='hidden';
+    document.getElementById("wall_palette").style.visibility='hidden';
+    document.getElementById("actor_palette").style.visibility='visible';
 }
 function click_rewrite() {
     let myCol = $(this).attr("id");
@@ -162,26 +163,37 @@ function click_rewrite() {
     $("#row_display").text(myRow);
     let paint=current_marker();
     switch(submap) {
-        /*case "ground":
-            $(".ground_map").children("#"+myRow).children("#"+myCol).text(paint);
-            break;*/
-        /*case "wall":
-            $(".wall_map").children("#"+myRow).children("#"+myCol).text(paint);
-            break;*/
         case "actor":
-            $(".actor_map").children("#"+myRow).children("#"+myCol).text(paint);
+            let coords="actor_map_"+ii+"_"+jj;
+            document.getElementById(coords).textContent=paint;
             break;
     }
 }
-function clear_map(submap) {
+function clear_map(map_box) {
     for (let ii = 0; ii < map_cols; ii+=1) {
         for (let jj= 0; jj < map_rows; jj+=1) {
-            switch (submap) {
+            switch (map_box) {
                 case "temp":
-                    $(".temp_map").children("#"+jj).children("#"+ii).text(empty_tile);
+                    let coords="temp_map_"+jj+"_"+ii;
+                    //console.log("attempting to clear "+coords);
+                    document.getElementById(coords).textContent=empty_tile;
                     break;
             }
         }
+    }
+}
+function populate_map(map_box) {
+    for (let ii=0; ii<map_rows; ii+=1) {
+        let new_row=document.createElement("p");
+        new_row.id=map_box+"_"+ii;
+        new_row.className="map_pixel";
+        for (let jj=0; jj<map_cols; jj+=1) {
+            let new_col=document.createElement("span");
+            new_col.id=map_box+"_"+ii+"_"+jj;
+            new_col.textContent=empty_tile;
+            new_row.append(new_col);
+        }
+        document.getElementById(map_box).append(new_row);
     }
 }
 function fresh_map() {
@@ -199,22 +211,14 @@ function fresh_map() {
     document.getElementById("actor_map").replaceChildren();
     document.getElementById("temp_map").replaceChildren();
     //fill with map_rows worth of p elements
-    for(let ii=0; ii<map_rows; ii+=1) {
-        let new_row=document.createElement("p");
-        new_row.id=ii;
-        new_row.className="map_pixel";
-        document.getElementById("ground_map").append(new_row.cloneNode(true));
-        document.getElementById("temp_map").append(new_row.cloneNode(true));
-        document.getElementById("wall_map").append(new_row.cloneNode(true));
-        document.getElementById("actor_map").append(new_row.cloneNode(true));
-        document.getElementById("map_canvas").append(new_row.cloneNode(true));
-    }
-    //fill each p element with map_cols span elements
-    for (let jj=0; jj<map_cols; jj+=1) {
-        $('p.map_pixel').append("<span id=\""+jj+"\">"+empty_tile+"</span>");
-    }
+    populate_map("ground_map");
+    populate_map("temp_map");
+    populate_map("wall_map");
+    populate_map("actor_map");
+    populate_map("map_canvas");
+
     //start will a full dirt ground
-    update_square(0,map_cols,0,map_rows,"ground");
+    update_square(0,map_cols-1,0,map_rows-1,"ground");
     console.log("Creating Fresh Map");
     synthesize_map();
 
@@ -227,15 +231,16 @@ function fresh_map() {
             //functionality will alter based on mode
             switch(submap) {
                 case "ground":
-                    drag_corner_col = $(this).attr("id");
-                    drag_corner_row = $(this).parent().attr("id");
+                    drag_corner_col = $(this).attr("id").split("_")[3];
+                    drag_corner_row = $(this).attr("id").split("_")[2];
                     drag = "down"
                     break;
                 case "wall":
                     let paint=current_marker();
-                    let myCol = $(this).attr("id");
-                    let myRow = $(this).parent().attr("id");
-                    $(".wall_map").children("#"+myRow).children("#"+myCol).text(paint);
+                    let myCol = $(this).attr("id").split("_")[3];
+                    let myRow = $(this).attr("id").split("_")[2];
+                    coords=$(this).attr("id").replace("map_canvas","wall_map");
+                    document.getElementById(coords).textContent=paint;
                     synthesize_map();  
                     break;
             }
@@ -249,10 +254,11 @@ function fresh_map() {
             //functionality will alter based on mode
             switch(submap) {
                 case "ground":
-                    myCol = $(this).attr("id");
-                    myRow = $(this).parent().attr("id");
+                    myCol = $(this).attr("id").split("_")[3];
+                    myRow = $(this).attr("id").split("_")[2];
                     drag = "up";
                     update_square(drag_corner_col,myCol,drag_corner_row,myRow,"ground");
+                    clear_map("temp");
                     synthesize_map();
                     break;
             }
@@ -264,12 +270,13 @@ function fresh_map() {
     $('p.map_pixel span').hover(
         function() {
             if (draw === 1) {
-                let myCol = $(this).attr("id");
-                let myRow = $(this).parent().attr("id");
+                let myCol = $(this).attr("id").split("_")[3];
+                let myRow = $(this).attr("id").split("_")[2];
                 let paint=current_marker();
                 switch(submap) {
                     case "wall":
-                        $(".wall_map").children("#"+myRow).children("#"+myCol).text(paint);
+                        coords=$(this).attr("id").replace("map_canvas","wall_map");
+                        document.getElementById(coords).textContent=paint;
                         synthesize_map();
                     break;
                     case "ground":
@@ -282,7 +289,7 @@ function fresh_map() {
         }
     );
 }
-function update_square(x1, x2, y1, y2, submap) {
+function update_square(x1, x2, y1, y2, map_box) {
     //swap if first is larger
     if (parseInt(x1,10)>parseInt(x2,10)) {
         drawX1=parseInt(x2,10);
@@ -303,12 +310,13 @@ function update_square(x1, x2, y1, y2, submap) {
     let paint=current_marker();
     for (ii=drawX1; ii<=drawX2; ii++) {
         for (jj=drawY1; jj<=drawY2; jj++) {
-            switch(submap) {
+            let coord_tail="_"+jj+"_"+ii;
+            switch(map_box) {
                 case "ground":
-                    $(".ground_map").children("#"+jj).children("#"+ii).text(paint);
+                    document.getElementById("ground_map"+coord_tail).textContent=paint;
                     break;
                 case "temp":
-                    $(".temp_map").children("#"+jj).children("#"+ii).text(paint);
+                    document.getElementById("temp_map"+coord_tail).textContent=paint;
                     break;
             }
         }
