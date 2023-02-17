@@ -37,8 +37,9 @@ const map_mapping={
 function synthesize_map() {
     //create a combined map by merging all layers
     let line="";
+    let update_clip="";
     let symbol_set=null;
-    $("#clip_area").val("");
+    document.getElementById("clip_area").textContent="";
     for (let ii=0; ii<map_rows; ii+=1) {
         line="";
         for (let jj=0; jj<map_cols; jj+=1) {
@@ -66,12 +67,12 @@ function synthesize_map() {
             line=line+paint;
         }
         if (ii===0) {
-            update_clip=$("#clip_area").val()+line;
+            update_clip=line;
         } else {
-            update_clip=$("#clip_area").val()+"\n"+line;
+            update_clip=update_clip+"\n"+line;
         }
-        $("#clip_area").val(update_clip);
     }
+    document.getElementById("clip_area").textContent=update_clip;
 }
 
 function current_marker() {
@@ -137,7 +138,8 @@ function current_marker() {
 }
 function edit_ground() {
     submap="ground";
-    $("#ground_palette").css('visibility', 'visible');
+    document.getElementById("ground_palette").style.visibility='visible';
+    //$("#ground_palette").css('visibility', 'visible');
     $("#wall_palette").css('visibility', 'hidden');
     $("#actor_palette").css('visibility', 'hidden');
 }
