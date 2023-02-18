@@ -1,5 +1,4 @@
 <head>
-<script src="jquery-3.6.3.min.js"></script>
 </head>
 
 <script type="text/javascript">
@@ -15,8 +14,8 @@ const empty_tile='█';
 
 const map_mapping={
     "ground": {
-        "D": ['.',',',':',';','∙'],
-        "G": ['"','‟','‘','`'],
+        "D": ['.',':',';','∙'],
+        "G": ['"','‟','‘','`',','],
         "R": ['°','σ','Ω',],
         "W": ["≈",'~'],
         "T": ["+"],
@@ -65,7 +64,6 @@ function synthesize_map() {
             }
             paint=symbol_set[(Math.random() * symbol_set.length) | 0];
             document.getElementById("map_canvas"+coord_tail).textContent=paint;
-            //$(".map_canvas").children("#"+ii).children("#"+jj).text(paint);
             line=line+paint;
         }
         if (ii===0) {
@@ -79,10 +77,17 @@ function synthesize_map() {
 
 function current_marker() {
     let rval="0";
+    let picked=null;
+    let radio_elements=null;
     //base on palette
     switch(submap) {
         case "ground":
-            picked = $('input[name="ground_material"]:checked').val();
+            radio_elements=document.getElementsByName("ground_material");
+            for(let ii=0; ii<radio_elements.length; ii+=1) {
+                if (radio_elements[ii].checked) {
+                    picked=radio_elements[ii].id;
+                }
+            }    
             console.log("current_marker: "+picked+ " selected");
             switch(picked) {
                 case "ground_dirt":
@@ -106,7 +111,12 @@ function current_marker() {
             }
             break;
         case "wall":
-            picked = $('input[name="wall_material"]:checked').val();
+            radio_elements=document.getElementsByName("wall_material");
+            for(let ii=0; ii<radio_elements.length; ii+=1) {
+                if (radio_elements[ii].checked) {
+                    picked=radio_elements[ii].id;
+                }
+            }
             console.log("current_marker: "+picked+ " selected");
             switch(picked) {
                 case "wall_constructed":
@@ -124,7 +134,12 @@ function current_marker() {
             }
             break;
         case "actor":
-            picked = $('input[name="actor_token"]:checked').val();
+            radio_elements=document.getElementsByName("actor_token");
+            for(let ii=0; ii<radio_elements.length; ii+=1) {
+                if (radio_elements[ii].checked) {
+                    picked=radio_elements[ii].id;
+                }
+            } 
             console.log("current_marker: "+picked+ " selected");
             switch(picked) {
                 case "actor_player":
@@ -164,8 +179,9 @@ function click_rewrite(event) {
     let paint=current_marker();
     switch(submap) {
         case "actor":
-            let coords=event.target.id;
+            let coords=event.target.id.replace("map_canvas","actor_map");
             document.getElementById(coords).textContent=paint;
+            synthesize_map();
             break;
     }
 }
@@ -196,6 +212,60 @@ function populate_map(map_box) {
         document.getElementById(map_box).append(new_row);
     }
 }
+function canvas_mousedown_event(event) {
+    //functionality will alter based on mode
+    switch(submap) {
+        case "ground":
+            drag_corner_col = event.target.id.split("_")[3];
+            drag_corner_row = event.target.id.split("_")[2];
+            drag = "down"
+            break;
+        case "wall":
+            let paint=current_marker();
+            let myCol = event.target.id.split("_")[3];
+            let myRow = event.target.id.split("_")[2];
+            coords=event.target.id.replace("map_canvas","wall_map");
+            document.getElementById(coords).textContent=paint;
+            synthesize_map();  
+            break;
+    }
+    document.getElementById("state").textContent="Down";
+    draw=1;
+}
+function canvas_mouseup_event(event) {
+    //functionality will alter based on mode
+    switch(submap) {
+    case "ground":
+        let myCol = event.target.id.split("_")[3];
+        let myRow = event.target.id.split("_")[2];
+        drag = "up";
+        update_square(drag_corner_col,myCol,drag_corner_row,myRow,"ground");
+        clear_map("temp");
+        synthesize_map();
+        break;
+    }
+    document.getElementById("state").textContent="Up";
+    draw=0;
+}
+function canvas_mouseenter_event(event) {
+    if (draw === 1) {
+        let myCol = event.target.id.split("_")[3];
+        let myRow = event.target.id.split("_")[2];
+        let paint=current_marker();
+        switch(submap) {
+            case "wall":
+                coords=event.target.id.replace("map_canvas","wall_map");
+                document.getElementById(coords).textContent=paint;
+                synthesize_map();
+            break;
+            case "ground":
+                clear_map("temp");
+                update_square(drag_corner_col,myCol,drag_corner_row,myRow,"temp");
+                synthesize_map();
+            break;
+        }
+    }
+}
 function fresh_map() {
     //get input
     map_rows=parseInt(document.getElementById("num_rows").value,10);
@@ -220,72 +290,16 @@ function fresh_map() {
     console.log("Creating Fresh Map");
     synthesize_map();
 
-    $('p.map_pixel span').click(
-        click_rewrite
-    );
-
-    $('p.map_pixel span').mousedown(
-        function() {
-            //functionality will alter based on mode
-            switch(submap) {
-                case "ground":
-                    drag_corner_col = $(this).attr("id").split("_")[3];
-                    drag_corner_row = $(this).attr("id").split("_")[2];
-                    drag = "down"
-                    break;
-                case "wall":
-                    let paint=current_marker();
-                    let myCol = $(this).attr("id").split("_")[3];
-                    let myRow = $(this).attr("id").split("_")[2];
-                    coords=$(this).attr("id").replace("map_canvas","wall_map");
-                    document.getElementById(coords).textContent=paint;
-                    synthesize_map();  
-                    break;
-            }
-            $('#state').text("Down");
-            draw=1;
+    //assign click events to each item in map_canvas
+    for (let rr=0; rr<map_rows; rr+=1) {
+        for (let cc=0; cc<map_cols; cc+=1) {
+            let coords="_"+rr+"_"+cc;
+            document.getElementById("map_canvas"+coords).addEventListener('click',click_rewrite);
+            document.getElementById("map_canvas"+coords).addEventListener('mousedown',canvas_mousedown_event);
+            document.getElementById("map_canvas"+coords).addEventListener('mouseup',canvas_mouseup_event);
+            document.getElementById("map_canvas"+coords).addEventListener('mouseenter',canvas_mouseenter_event);
         }
-    );
-
-    $('p.map_pixel span').mouseup(
-        function() {
-            //functionality will alter based on mode
-            switch(submap) {
-                case "ground":
-                    myCol = $(this).attr("id").split("_")[3];
-                    myRow = $(this).attr("id").split("_")[2];
-                    drag = "up";
-                    update_square(drag_corner_col,myCol,drag_corner_row,myRow,"ground");
-                    clear_map("temp");
-                    synthesize_map();
-                    break;
-            }
-            $('#state').text("Up");
-            draw=0;
-        }
-    );
-
-    $('p.map_pixel span').hover(
-        function() {
-            if (draw === 1) {
-                let myCol = $(this).attr("id").split("_")[3];
-                let myRow = $(this).attr("id").split("_")[2];
-                let paint=current_marker();
-                switch(submap) {
-                    case "wall":
-                        coords=$(this).attr("id").replace("map_canvas","wall_map");
-                        document.getElementById(coords).textContent=paint;
-                        synthesize_map();
-                    break;
-                    case "ground":
-                        clear_map("temp");
-                        update_square(drag_corner_col,myCol,drag_corner_row,myRow,"temp");
-                        synthesize_map();
-                    break;
-                }
-            }
-        }
-    );
+    }
 }
 function update_square(x1, x2, y1, y2, map_box) {
     //swap if first is larger
@@ -390,10 +404,10 @@ user-select: none;
             <!-- palette for actors -->
             <div style="display: table-row; visibility: hidden;" id="actor_palette">
                 <div style="display: table-cell;">
-                    <input type="radio" name="actor_token" value="actor_player" id="wall_constructed" checked>
+                    <input type="radio" name="actor_token" value="actor_player" id="actor_player" checked>
                     <label for="actor_player">Player Character</label>
                     <br />
-                    <input type="radio" name="actor_token" value="actor_monster" id="wall_natural">
+                    <input type="radio" name="actor_token" value="actor_monster" id="actor_monster">
                     <label for="actor_monster">Monster</label>
                     <br />
                 </div>
