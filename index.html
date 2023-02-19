@@ -1,30 +1,35 @@
+<!DOCTYPE html>
 <head>
+    <style type='text/css'>
+        p.map_pixel {
+        font-family: monospace;
+        line-height: 0em;
+        font-size: 30px;
+        -moz-user-select: -moz-none;
+        -khtml-user-select: none;
+        -webkit-user-select: none;
+        -o-user-select: none;
+        user-select: none;
+        }
+    </style>
 </head>
 
 <script type="text/javascript">
-let drag="up";
-let drag_corner_row=0;
-let drag_corner_col=0;
-let submap="ground";
-let picked=null;
-let draw=0;
-let map_rows=0;
-let map_cols=0;
+//some global settings for the ascii palette
 const empty_tile='█';
-
 const map_mapping={
     "ground": {
         "D": ['.',':',';','∙'],
         "G": ['"','‟','‘','`',','],
-        "R": ['°','σ','Ω',],
+        "R": ['°','σ','¤'],
         "W": ["≈",'~'],
         "T": ["+"],
         "H": ["-"],
     },
     "wall": {
         "W": ["╬"],
-        "N": [")"],
-        "T": ["O"],
+        "N": [")","(","|"],
+        "T": ["Ω"],
         "D": ["∩"],
     },
     "actor": {
@@ -32,6 +37,16 @@ const map_mapping={
         "M": ["M"],
     }
 }
+
+let palette_state={};
+palette_state.drag_click="up";
+let drag_corner_row=0;
+let drag_corner_col=0;
+let submap="ground";
+let picked=null;
+let draw=0;
+let map_rows=0;
+let map_cols=0;
 
 function synthesize_map() {
     //create a combined map by merging all layers
@@ -60,7 +75,7 @@ function synthesize_map() {
             }
             if (temp_layer !== empty_tile) {
                 symbol_set=map_mapping.ground[temp_layer];
-                console.log("using character");
+                console.log("using temp");
             }
             paint=symbol_set[(Math.random() * symbol_set.length) | 0];
             document.getElementById("map_canvas"+coord_tail).textContent=paint;
@@ -218,7 +233,7 @@ function canvas_mousedown_event(event) {
         case "ground":
             drag_corner_col = event.target.id.split("_")[3];
             drag_corner_row = event.target.id.split("_")[2];
-            drag = "down"
+            palette_state.drag_click = "down"
             break;
         case "wall":
             let paint=current_marker();
@@ -238,7 +253,7 @@ function canvas_mouseup_event(event) {
     case "ground":
         let myCol = event.target.id.split("_")[3];
         let myRow = event.target.id.split("_")[2];
-        drag = "up";
+        palette_state.drag_click = "up";
         update_square(drag_corner_col,myCol,drag_corner_row,myRow,"ground");
         clear_map("temp");
         synthesize_map();
@@ -336,18 +351,8 @@ function update_square(x1, x2, y1, y2, map_box) {
 }
 </script>
 
-<style type='text/css'>
-p.map_pixel {
-font-family: monospace;
-line-height: 0em;
-font-size: 30;
--moz-user-select: -moz-none;
--khtml-user-select: none;
--webkit-user-select: none;
--o-user-select: none;
-user-select: none;
-}
-</style>
+
+
 <p></p>
 <div style="width: 100%; display:table;">
     <div style="display: table-row;">
@@ -418,7 +423,6 @@ user-select: none;
 <br />
 <hr>
 
-<p>11111</p>
 <p></p>
 <!-- debug -->
 State:<span id="state"></span>
@@ -448,3 +452,4 @@ Y:<span id="row_display"></span>
 <!--copypasta area-->
 <textarea id="clip_area">
 </textarea>
+</html>
