@@ -38,15 +38,19 @@ const map_mapping={
     }
 }
 
-let palette_state={};
-palette_state.drag_click="up";
-let drag_corner_row=0;
-let drag_corner_col=0;
-let submap="ground";
-let picked=null;
-let draw=0;
-let map_rows=0;
-let map_cols=0;
+//palette state object
+let ps={}; 
+//which of the palette subtypes is selected
+ps.tab="ground";
+//flags and variables used for drawing boxes, i.e. for painting ground
+ps.box_draw=false;
+ps.box_start_row=0;
+ps.box_start_col=0;
+//flags for line mode, i.e. for painting walls
+ps.line_draw=false;
+//size of the map being drawn
+ps.rows=0;
+ps.cols=0;
 
 function synthesize_map() {
     //create a combined map by merging all layers
@@ -54,9 +58,9 @@ function synthesize_map() {
     let update_clip="";
     let symbol_set=null;
     document.getElementById("clip_area").textContent="";
-    for (let ii=0; ii<map_rows; ii+=1) {
+    for (let ii=0; ii<ps.rows; ii+=1) {
         line="";
-        for (let jj=0; jj<map_cols; jj+=1) {
+        for (let jj=0; jj<ps.cols; jj+=1) {
             let coord_tail="_"+ii+"_"+jj;
             ground_layer=document.getElementById("ground_map"+coord_tail).textContent;
             wall_layer=document.getElementById("wall_map"+coord_tail).textContent;
@@ -95,7 +99,7 @@ function current_marker() {
     let picked=null;
     let radio_elements=null;
     //base on palette
-    switch(submap) {
+    switch(ps.tab) {
         case "ground":
             radio_elements=document.getElementsByName("ground_material");
             for(let ii=0; ii<radio_elements.length; ii+=1) {
@@ -169,19 +173,19 @@ function current_marker() {
     return rval;
 }
 function edit_ground() {
-    submap="ground";
+    ps.tab="ground";
     document.getElementById("ground_palette").style.visibility='visible';
     document.getElementById("wall_palette").style.visibility='hidden';
     document.getElementById("actor_palette").style.visibility='hidden';
 }
 function edit_wall() {
-    submap="wall";
+    ps.tab="wall";
     document.getElementById("ground_palette").style.visibility='hidden';
     document.getElementById("wall_palette").style.visibility='visible';
     document.getElementById("actor_palette").style.visibility='hidden';
 }
 function edit_actor() {
-    submap="actor";
+    ps.tab="actor";
     document.getElementById("ground_palette").style.visibility='hidden';
     document.getElementById("wall_palette").style.visibility='hidden';
     document.getElementById("actor_palette").style.visibility='visible';
@@ -192,7 +196,7 @@ function click_rewrite(event) {
     document.getElementById("col_display").textContent=myCol;
     document.getElementById("row_display").textContent=myRow;
     let paint=current_marker();
-    switch(submap) {
+    switch(ps.tab) {
         case "actor":
             let coords=event.target.id.replace("map_canvas","actor_map");
             document.getElementById(coords).textContent=paint;
@@ -201,8 +205,8 @@ function click_rewrite(event) {
     }
 }
 function clear_map(map_box) {
-    for (let ii = 0; ii < map_cols; ii+=1) {
-        for (let jj= 0; jj < map_rows; jj+=1) {
+    for (let ii = 0; ii < ps.cols; ii+=1) {
+        for (let jj= 0; jj < ps.rows; jj+=1) {
             switch (map_box) {
                 case "temp":
                     let coords="temp_map_"+jj+"_"+ii;
@@ -214,11 +218,11 @@ function clear_map(map_box) {
     }
 }
 function populate_map(map_box) {
-    for (let ii=0; ii<map_rows; ii+=1) {
+    for (let ii=0; ii<ps.rows; ii+=1) {
         let new_row=document.createElement("p");
         new_row.id=map_box+"_"+ii;
         new_row.className="map_pixel";
-        for (let jj=0; jj<map_cols; jj+=1) {
+        for (let jj=0; jj<ps.cols; jj+=1) {
             let new_col=document.createElement("span");
             new_col.id=map_box+"_"+ii+"_"+jj;
             new_col.textContent=empty_tile;
@@ -228,46 +232,49 @@ function populate_map(map_box) {
     }
 }
 function canvas_mousedown_event(event) {
+    let myCol = event.target.id.split("_")[3];
+    let myRow = event.target.id.split("_")[2];
     //functionality will alter based on mode
-    switch(submap) {
+    switch(ps.tab) {
         case "ground":
-            drag_corner_col = event.target.id.split("_")[3];
-            drag_corner_row = event.target.id.split("_")[2];
-            palette_state.drag_click = "down"
+            ps.box_start_col = event.target.id.split("_")[3];
+            ps.box_start_row = event.target.id.split("_")[2];
+            ps.box_draw = true;
+            clear_map("temp");
+            update_square(ps.box_start_col,myCol,ps.box_start_row,myRow,"temp");
+            synthesize_map();
             break;
         case "wall":
+            ps.line_draw = true;
             let paint=current_marker();
-            let myCol = event.target.id.split("_")[3];
-            let myRow = event.target.id.split("_")[2];
             coords=event.target.id.replace("map_canvas","wall_map");
             document.getElementById(coords).textContent=paint;
             synthesize_map();  
             break;
     }
     document.getElementById("state").textContent="Down";
-    draw=1;
 }
 function canvas_mouseup_event(event) {
     //functionality will alter based on mode
-    switch(submap) {
+    switch(ps.tab) {
     case "ground":
         let myCol = event.target.id.split("_")[3];
         let myRow = event.target.id.split("_")[2];
-        palette_state.drag_click = "up";
-        update_square(drag_corner_col,myCol,drag_corner_row,myRow,"ground");
+        update_square(ps.box_start_col,myCol,ps.box_start_row,myRow,"ground");
         clear_map("temp");
         synthesize_map();
         break;
     }
     document.getElementById("state").textContent="Up";
-    draw=0;
+    ps.box_draw=false;
+    ps.line_draw=false;
 }
 function canvas_mouseenter_event(event) {
-    if (draw === 1) {
+    if (ps.box_draw || ps.line_draw) {
         let myCol = event.target.id.split("_")[3];
         let myRow = event.target.id.split("_")[2];
         let paint=current_marker();
-        switch(submap) {
+        switch(ps.tab) {
             case "wall":
                 coords=event.target.id.replace("map_canvas","wall_map");
                 document.getElementById(coords).textContent=paint;
@@ -275,7 +282,7 @@ function canvas_mouseenter_event(event) {
             break;
             case "ground":
                 clear_map("temp");
-                update_square(drag_corner_col,myCol,drag_corner_row,myRow,"temp");
+                update_square(ps.box_start_col,myCol,ps.box_start_row,myRow,"temp");
                 synthesize_map();
             break;
         }
@@ -283,8 +290,8 @@ function canvas_mouseenter_event(event) {
 }
 function fresh_map() {
     //get input
-    map_rows=parseInt(document.getElementById("num_rows").value,10);
-    map_cols=parseInt(document.getElementById("num_cols").value,10);
+    ps.rows=parseInt(document.getElementById("num_rows").value,10);
+    ps.cols=parseInt(document.getElementById("num_cols").value,10);
     document.getElementById("clip_area").textContent="";
     //empty the map area
     document.getElementById("map_canvas").replaceChildren();
@@ -293,7 +300,7 @@ function fresh_map() {
     document.getElementById("wall_map").replaceChildren();
     document.getElementById("actor_map").replaceChildren();
     document.getElementById("temp_map").replaceChildren();
-    //fill with map_rows worth of p elements
+    //fill with ps.rows worth of p elements
     populate_map("ground_map");
     populate_map("temp_map");
     populate_map("wall_map");
@@ -301,13 +308,13 @@ function fresh_map() {
     populate_map("map_canvas");
 
     //start will a full dirt ground
-    update_square(0,map_cols-1,0,map_rows-1,"ground");
+    update_square(0,ps.cols-1,0,ps.rows-1,"ground");
     console.log("Creating Fresh Map");
     synthesize_map();
 
     //assign click events to each item in map_canvas
-    for (let rr=0; rr<map_rows; rr+=1) {
-        for (let cc=0; cc<map_cols; cc+=1) {
+    for (let rr=0; rr<ps.rows; rr+=1) {
+        for (let cc=0; cc<ps.cols; cc+=1) {
             let coords="_"+rr+"_"+cc;
             document.getElementById("map_canvas"+coords).addEventListener('click',click_rewrite);
             document.getElementById("map_canvas"+coords).addEventListener('mousedown',canvas_mousedown_event);
@@ -315,6 +322,8 @@ function fresh_map() {
             document.getElementById("map_canvas"+coords).addEventListener('mouseenter',canvas_mouseenter_event);
         }
     }
+    //handling the situation where the mouse is let go outside the canvas
+    document.body.addEventListener("mouseup",function(even) {ps.box_draw=false;ps.line_draw=false});
 }
 function update_square(x1, x2, y1, y2, map_box) {
     //swap if first is larger
