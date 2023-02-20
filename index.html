@@ -21,7 +21,7 @@ const map_mapping={
     "ground": {
         "D": ['.',':',';','∙'],
         "G": ['"','‟','‘','`',','],
-        "R": ['°','σ','¤'],
+        "R": ['°','σ','¤','ø'],
         "W": ["≈",'~'],
         "T": ["+"],
         "H": ["-"],
@@ -57,6 +57,7 @@ function synthesize_map() {
     let line="";
     let update_clip="";
     let symbol_set=null;
+    const wall_symbol="╬";
     document.getElementById("clip_area").textContent="";
     for (let ii=0; ii<ps.rows; ii+=1) {
         line="";
@@ -82,6 +83,9 @@ function synthesize_map() {
                 console.log("using temp");
             }
             paint=symbol_set[(Math.random() * symbol_set.length) | 0];
+            if (paint == wall_symbol) {
+                paint=connected_wall(ii,jj);
+            }
             document.getElementById("map_canvas"+coord_tail).textContent=paint;
             line=line+paint;
         }
@@ -92,6 +96,38 @@ function synthesize_map() {
         }
     }
     document.getElementById("clip_area").textContent=update_clip;
+}
+
+function connected_wall(row,col) {
+    //check the tiles around the specified tile, and return the connected wall
+    //tile that should be used.
+    //Use a encoding system with the four surrounding tiles, NESW as 1,2,4,8
+    const lookup_table=['╬','╬','╬','╚','╬','║','╔','╠',
+                        '╬','╝','═','╩','╗','╣','╦','╬'];
+    //compute lookup - edges count as walls
+    let index=0;
+    //north side
+    let coords="wall_map_"+(parseInt(row,10)-1).toString()+"_"+col;
+    if ((row==0) || (document.getElementById(coords).textContent == "W")) {
+        index=index+1;
+    }
+    //east side
+    coords="wall_map_"+row+"_"+(parseInt(col,10)+1).toString();
+    if ((col==ps.cols-1) || (document.getElementById(coords).textContent == "W")) {
+        index=index+2;
+    }
+    //south side
+    coords="wall_map_"+(parseInt(row,10)+1).toString()+"_"+col;
+    if ((row==ps.rows-1) || (document.getElementById(coords).textContent == "W")) {
+        index=index+4;
+    }
+    //west side
+    coords="wall_map_"+row+"_"+(parseInt(col,10)-1).toString();
+    if ((col==0) || (document.getElementById(coords).textContent == "W")) {
+        index=index+8;
+    }
+    let rval=lookup_table[index];
+    return rval;
 }
 
 function current_marker() {
