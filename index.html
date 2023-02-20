@@ -53,6 +53,8 @@ ps.line_draw=false;
 //size of the map being drawn
 ps.rows=0;
 ps.cols=0;
+//handle click on wall action
+ps.dirty_wall=false;
 
 
 function synthesize_map() {
@@ -246,11 +248,18 @@ function click_rewrite(event) {
     document.getElementById("col_display").textContent=myCol;
     document.getElementById("row_display").textContent=myRow;
     let paint=current_marker();
+    let coords=event.target.id;
     switch(ps.tab) {
         case "actor":
-            let coords=event.target.id.replace("map_canvas","actor_map");
-            document.getElementById(coords).textContent=paint;
+            document.getElementById(coords.replace("map_canvas","actor_map")).textContent=paint;
             synthesize_map();
+            break;
+        case "wall":
+            if (ps.dirty_wall) {
+                document.getElementById(coords.replace("map_canvas","wall_map")).textContent=empty_tile;
+                synthesize_map();
+                ps.dirty_wall=false;
+            }
             break;
     }
 }
@@ -284,6 +293,7 @@ function populate_map(map_box) {
 function canvas_mousedown_event(event) {
     let myCol = event.target.id.split("_")[3];
     let myRow = event.target.id.split("_")[2];
+    let coords=event.target.id;
     //functionality will alter based on mode
     switch(ps.tab) {
         case "ground":
@@ -297,8 +307,10 @@ function canvas_mousedown_event(event) {
         case "wall":
             ps.line_draw = true;
             let paint=current_marker();
-            coords=event.target.id.replace("map_canvas","wall_map");
-            document.getElementById(coords).textContent=paint;
+            if (document.getElementById(coords.replace("map_canvas","wall_map")).textContent==paint) {
+                ps.dirty_wall=true;
+            }
+            document.getElementById(coords.replace("map_canvas","wall_map")).textContent=paint;
             synthesize_map();  
             break;
     }
@@ -326,6 +338,7 @@ function canvas_mouseenter_event(event) {
         let paint=current_marker();
         switch(ps.tab) {
             case "wall":
+                ps.dirty_wall=false;
                 coords=event.target.id.replace("map_canvas","wall_map");
                 document.getElementById(coords).textContent=paint;
                 synthesize_map();
