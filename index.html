@@ -3,7 +3,8 @@
     <style type='text/css'>
         p.map_pixel {
         font-family: monospace;
-        line-height: 0em;
+        padding: 0;
+        margin: 0;
         font-size: 30px;
         -moz-user-select: -moz-none;
         -khtml-user-select: none;
@@ -25,6 +26,7 @@ const map_mapping={
         "W": ["≈",'~'],
         "T": ["+"],
         "H": ["-"],
+        "V": ["░"]
     },
     "wall": {
         "W": ["╬"],
@@ -51,6 +53,7 @@ ps.line_draw=false;
 //size of the map being drawn
 ps.rows=0;
 ps.cols=0;
+
 
 function synthesize_map() {
     //create a combined map by merging all layers
@@ -108,22 +111,30 @@ function connected_wall(row,col) {
     let index=0;
     //north side
     let coords="wall_map_"+(parseInt(row,10)-1).toString()+"_"+col;
-    if ((row==0) || (document.getElementById(coords).textContent == "W")) {
+    let neighbor_element=document.getElementById(coords);
+    let neighbor= (neighbor_element==null ? empty_tile : neighbor_element.textContent);
+    if ((row==0) || (neighbor != empty_tile)) {
         index=index+1;
     }
     //east side
     coords="wall_map_"+row+"_"+(parseInt(col,10)+1).toString();
-    if ((col==ps.cols-1) || (document.getElementById(coords).textContent == "W")) {
+    neighbor_element=document.getElementById(coords);
+    neighbor= (neighbor_element==null ? empty_tile : neighbor_element.textContent);
+    if ((col==ps.cols-1) || (neighbor != empty_tile)) {
         index=index+2;
     }
     //south side
     coords="wall_map_"+(parseInt(row,10)+1).toString()+"_"+col;
-    if ((row==ps.rows-1) || (document.getElementById(coords).textContent == "W")) {
+    neighbor_element=document.getElementById(coords);
+    neighbor= (neighbor_element==null ? empty_tile : neighbor_element.textContent);
+    if ((row==ps.rows-1) || (neighbor != empty_tile)) {
         index=index+4;
     }
     //west side
     coords="wall_map_"+row+"_"+(parseInt(col,10)-1).toString();
-    if ((col==0) || (document.getElementById(coords).textContent == "W")) {
+    neighbor_element=document.getElementById(coords);
+    neighbor= (neighbor_element==null ? empty_tile : neighbor_element.textContent);
+    if ((col==0) || (neighbor != empty_tile)) {
         index=index+8;
     }
     let rval=lookup_table[index];
@@ -162,6 +173,9 @@ function current_marker() {
                     break;
                 case "ground_wood":
                     rval='H';
+                    break;
+                case "ground_void":
+                    rval='V';
                     break;
             }
             break;
@@ -432,6 +446,9 @@ function update_square(x1, x2, y1, y2, map_box) {
                     <br />
                     <input type="radio" name="ground_material" value="ground_wood" id="ground_wood">
                     <label for="ground_wood">Wooden</label>
+                    <br />
+                    <input type="radio" name="ground_material" value="ground_void" id="ground_void">
+                    <label for="ground_void">Solid/nonvisible</label>
                 </div>
             </div>
             <!-- palette for walls -->
