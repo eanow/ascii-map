@@ -62,10 +62,10 @@ function synthesize_map() {
     let symbol_set=null;
     const wall_symbol="╬";
     document.getElementById("clip_area").textContent="";
-    for (let ii=0; ii<ps.rows; ii+=1) {
+    for (let rr=0; rr<ps.rows; rr+=1) {
         line="";
-        for (let jj=0; jj<ps.cols; jj+=1) {
-            let coord_tail="_"+ii+"_"+jj;
+        for (let cc=0; cc<ps.cols; cc+=1) {
+            let coord_tail="_"+rr+"_"+cc;
             ground_layer=document.getElementById("ground_map"+coord_tail).textContent;
             wall_layer=document.getElementById("wall_map"+coord_tail).textContent;
             actor_layer=document.getElementById("actor_map"+coord_tail).textContent;
@@ -87,12 +87,12 @@ function synthesize_map() {
             }
             paint=symbol_set[(Math.random() * symbol_set.length) | 0];
             if (paint == wall_symbol) {
-                paint=connected_wall(ii,jj);
+                paint=connected_wall(rr,cc);
             }
             document.getElementById("map_canvas"+coord_tail).textContent=paint;
             line=line+paint;
         }
-        if (ii===0) {
+        if (rr===0) {
             update_clip=line;
         } else {
             update_clip=update_clip+"\n"+line;
@@ -255,11 +255,11 @@ function click_rewrite(event) {
     }
 }
 function clear_map(map_box) {
-    for (let ii = 0; ii < ps.cols; ii+=1) {
-        for (let jj= 0; jj < ps.rows; jj+=1) {
+    for (let cc = 0; cc < ps.cols; cc+=1) {
+        for (let rr= 0; rr < ps.rows; rr+=1) {
             switch (map_box) {
                 case "temp":
-                    let coords="temp_map_"+jj+"_"+ii;
+                    let coords="temp_map_"+rr+"_"+cc;
                     //console.log("attempting to clear "+coords);
                     document.getElementById(coords).textContent=empty_tile;
                     break;
@@ -268,13 +268,13 @@ function clear_map(map_box) {
     }
 }
 function populate_map(map_box) {
-    for (let ii=0; ii<ps.rows; ii+=1) {
+    for (let rr=0; rr<ps.rows; rr+=1) {
         let new_row=document.createElement("p");
-        new_row.id=map_box+"_"+ii;
+        new_row.id=map_box+"_"+rr;
         new_row.className="map_pixel";
-        for (let jj=0; jj<ps.cols; jj+=1) {
+        for (let cc=0; cc<ps.cols; cc+=1) {
             let new_col=document.createElement("span");
-            new_col.id=map_box+"_"+ii+"_"+jj;
+            new_col.id=map_box+"_"+rr+"_"+cc;
             new_col.textContent=empty_tile;
             new_row.append(new_col);
         }
@@ -291,7 +291,7 @@ function canvas_mousedown_event(event) {
             ps.box_start_row = event.target.id.split("_")[2];
             ps.box_draw = true;
             clear_map("temp");
-            update_square(ps.box_start_col,myCol,ps.box_start_row,myRow,"temp");
+            update_square(ps.box_start_row,myRow,ps.box_start_col,myCol,"temp");
             synthesize_map();
             break;
         case "wall":
@@ -310,7 +310,7 @@ function canvas_mouseup_event(event) {
     case "ground":
         let myCol = event.target.id.split("_")[3];
         let myRow = event.target.id.split("_")[2];
-        update_square(ps.box_start_col,myCol,ps.box_start_row,myRow,"ground");
+        update_square(ps.box_start_row,myRow,ps.box_start_col,myCol,"ground");
         clear_map("temp");
         synthesize_map();
         break;
@@ -332,7 +332,7 @@ function canvas_mouseenter_event(event) {
             break;
             case "ground":
                 clear_map("temp");
-                update_square(ps.box_start_col,myCol,ps.box_start_row,myRow,"temp");
+                update_square(ps.box_start_row,myRow,ps.box_start_col,myCol,"temp");
                 synthesize_map();
             break;
         }
@@ -358,7 +358,7 @@ function fresh_map() {
     populate_map("map_canvas");
 
     //start will a full dirt ground
-    update_square(0,ps.cols-1,0,ps.rows-1,"ground");
+    update_square(0,ps.rows-1,0,ps.cols-1,"ground");
     console.log("Creating Fresh Map");
     synthesize_map();
 
@@ -375,28 +375,28 @@ function fresh_map() {
     //handling the situation where the mouse is let go outside the canvas
     document.body.addEventListener("mouseup",function(even) {ps.box_draw=false;ps.line_draw=false});
 }
-function update_square(x1, x2, y1, y2, map_box) {
+function update_square(r1, r2, c1, c2, map_box) {
     //swap if first is larger
-    if (parseInt(x1,10)>parseInt(x2,10)) {
-        drawX1=parseInt(x2,10);
-        drawX2=parseInt(x1,10);
+    if (parseInt(c1,10)>parseInt(c2,10)) {
+        drawC1=parseInt(c2,10);
+        drawC2=parseInt(c1,10);
     } else {
-        drawX1=parseInt(x1,10);
-        drawX2=parseInt(x2,10);
+        drawC1=parseInt(c1,10);
+        drawC2=parseInt(c2,10);
     }
-    if (parseInt(y1,10)>parseInt(y2,10)) {
-        drawY1=parseInt(y2,10);
-        drawY2=parseInt(y1,10);
+    if (parseInt(r1,10)>parseInt(r2,10)) {
+        drawR1=parseInt(r2,10);
+        drawR2=parseInt(r1,10);
     } else {
-        drawY1=parseInt(y1,10);
-        drawY2=parseInt(y2,10);
+        drawR1=parseInt(r1,10);
+        drawR2=parseInt(r2,10);
     }
     console.log("drawing a square");
-    console.log(drawX1+" "+drawX2+" "+drawY1+" "+drawY2)
+    console.log(drawC1+" "+drawC2+" "+drawR1+" "+drawR2)
     let paint=current_marker();
-    for (ii=drawX1; ii<=drawX2; ii++) {
-        for (jj=drawY1; jj<=drawY2; jj++) {
-            let coord_tail="_"+jj+"_"+ii;
+    for (cc=drawC1; cc<=drawC2; cc++) {
+        for (rr=drawR1; rr<=drawR2; rr++) {
+            let coord_tail="_"+rr+"_"+cc;
             switch(map_box) {
                 case "ground":
                     document.getElementById("ground_map"+coord_tail).textContent=paint;
