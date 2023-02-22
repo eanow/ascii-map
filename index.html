@@ -372,6 +372,7 @@ function fresh_map() {
 
     //start will a full dirt ground
     edit_ground();
+    document.getElementById("ground_dirt").checked=true;
     update_square(0,ps.rows-1,0,ps.cols-1,"ground");
     console.log("Creating Fresh Map");
     synthesize_map();
