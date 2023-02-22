@@ -226,21 +226,21 @@ function current_marker() {
 }
 function edit_ground() {
     ps.tab="ground";
-    document.getElementById("ground_palette").style.visibility='visible';
-    document.getElementById("wall_palette").style.visibility='hidden';
-    document.getElementById("actor_palette").style.visibility='hidden';
+    document.getElementById("active_brush").append(document.getElementById("ground_brush"));
+    document.getElementById("brush_shelf").append(document.getElementById("actor_brush"));
+    document.getElementById("brush_shelf").append(document.getElementById("wall_brush"));
 }
 function edit_wall() {
     ps.tab="wall";
-    document.getElementById("ground_palette").style.visibility='hidden';
-    document.getElementById("wall_palette").style.visibility='visible';
-    document.getElementById("actor_palette").style.visibility='hidden';
+    document.getElementById("brush_shelf").append(document.getElementById("ground_brush"));
+    document.getElementById("brush_shelf").append(document.getElementById("actor_brush"));
+    document.getElementById("active_brush").append(document.getElementById("wall_brush"));
 }
 function edit_actor() {
     ps.tab="actor";
-    document.getElementById("ground_palette").style.visibility='hidden';
-    document.getElementById("wall_palette").style.visibility='hidden';
-    document.getElementById("actor_palette").style.visibility='visible';
+    document.getElementById("brush_shelf").append(document.getElementById("ground_brush"));
+    document.getElementById("active_brush").append(document.getElementById("actor_brush"));
+    document.getElementById("brush_shelf").append(document.getElementById("wall_brush"));
 }
 function click_rewrite(event) {
     let myCol = event.target.id.split("_")[3];
@@ -371,6 +371,7 @@ function fresh_map() {
     populate_map("map_canvas");
 
     //start will a full dirt ground
+    edit_ground();
     update_square(0,ps.rows-1,0,ps.cols-1,"ground");
     console.log("Creating Fresh Map");
     synthesize_map();
@@ -428,70 +429,72 @@ function update_square(r1, r2, c1, c2, map_box) {
 <p></p>
 <div style="width: 100%; display:table;">
     <div style="display: table-row;">
-        <div class="map_canvas" id="map_canvas" style="display: table-cell; width: 5%; margin:10;">
+        <div class="map_canvas" id="map_canvas" style="display: table-cell; width: 5%; margin:10;"></div>
+        <div class="drawing_palette" style="display: table-cell; width: auto; float:left;margin:10;"></div>
+        <div style="display: table-row;">
+            <div class="palette_select" style="display: table-cell;">
+                <button onclick="edit_ground()">Ground</button><br />
+                <button onclick="edit_wall()">Walls</button><br />
+                <button onclick="edit_actor()">Actors</button><br />
+            </div>
+        </div>
+        <div style="display: table-row; visibility: visible;" id="active_brush">
 
         </div>
-        <div class="drawing_palette" style="display: table-cell; width: auto; float:left;margin:10;"></div>
-            <div style="display: table-row;">
-                <div class="palette_select" style="display: table-cell;">
-                    <button onclick="edit_ground()">Ground</button><br />
-                    <button onclick="edit_wall()">Walls</button><br />
-                    <button onclick="edit_actor()">Actors</button><br />
-                </div>
-            </div>
-            <!-- palette for ground; stuff like dirt, grass, interior tile, etc -->
-            <div style="display: table-row; visibility: visible;" id="ground_palette">
-                <div style="display: table-cell;">
-                    <input type="radio" name="ground_material" value="ground_dirt" id="ground_dirt" checked>
-                    <label for="ground_dirt">Dirt</label>
-                    <br />
-                    <input type="radio" name="ground_material" value="ground_grass" id="ground_grass">
-                    <label for="ground_grass">Grass</label>
-                    <br />
-                    <input type="radio" name="ground_material" value="ground_rock" id="ground_rock">
-                    <label for="ground_rock">Rocky</label>
-                    <br />
-                    <input type="radio" name="ground_material" value="ground_water" id="ground_water">
-                    <label for="ground_water">Water</label>
-                    <br />
-                    <input type="radio" name="ground_material" value="ground_tile" id="ground_tile">
-                    <label for="ground_tile">Tile/Finished Stone</label>
-                    <br />
-                    <input type="radio" name="ground_material" value="ground_wood" id="ground_wood">
-                    <label for="ground_wood">Wooden</label>
-                    <br />
-                    <input type="radio" name="ground_material" value="ground_void" id="ground_void">
-                    <label for="ground_void">Solid/nonvisible</label>
-                </div>
-            </div>
-            <!-- palette for walls -->
-            <div style="display: table-row; visibility: hidden;" id="wall_palette">
-                <div style="display: table-cell;">
-                    <input type="radio" name="wall_material" value="wall_constructed" id="wall_constructed" checked>
-                    <label for="wall_constructed">Constructed Wall</label>
-                    <br />
-                    <input type="radio" name="wall_material" value="wall_natural" id="wall_natural">
-                    <label for="wall_natural">Natural Wall</label>
-                    <br />
-                    <input type="radio" name="wall_material" value="wall_terrain" id="wall_terrain">
-                    <label for="wall_terrain">Terrain Obstactle</label>
-                    <br />
-                    <input type="radio" name="wall_material" value="wall_door" id="wall_door">
-                    <label for="wall_door">Door</label>
-                    <br />
-                </div>
-            </div>
-            <!-- palette for actors -->
-            <div style="display: table-row; visibility: hidden;" id="actor_palette">
-                <div style="display: table-cell;">
-                    <input type="radio" name="actor_token" value="actor_player" id="actor_player" checked>
-                    <label for="actor_player">Player Character</label>
-                    <br />
-                    <input type="radio" name="actor_token" value="actor_monster" id="actor_monster">
-                    <label for="actor_monster">Monster</label>
-                    <br />
-                </div>
-            </div>
+    </div>
+</div>
+<div style="visibility: hidden; display:none;" id="brush_shelf">
+<!-- palette for actors -->
+    <div style="display: table-row;" id="actor_brush">
+        <div style="display: table-cell;">
+            <input type="radio" name="actor_token" value="actor_player" id="actor_player" checked>
+            <label for="actor_player">Player Character</label>
+            <br />
+            <input type="radio" name="actor_token" value="actor_monster" id="actor_monster">
+            <label for="actor_monster">Monster</label>
+            <br />
+        </div>
+    </div>
+    <!-- palette for walls -->
+    <div style="display: table-row;" id="wall_brush">
+        <div style="display: table-cell;">
+            <input type="radio" name="wall_material" value="wall_constructed" id="wall_constructed" checked>
+            <label for="wall_constructed">Constructed Wall</label>
+            <br />
+            <input type="radio" name="wall_material" value="wall_natural" id="wall_natural">
+            <label for="wall_natural">Natural Wall</label>
+            <br />
+            <input type="radio" name="wall_material" value="wall_terrain" id="wall_terrain">
+            <label for="wall_terrain">Terrain Obstactle</label>
+            <br />
+            <input type="radio" name="wall_material" value="wall_door" id="wall_door">
+            <label for="wall_door">Door</label>
+            <br />
+        </div>
+    </div>
+    <!-- palette for ground; stuff like dirt, grass, interior tile, etc -->
+    <div style="display: table-row;" id="ground_brush">
+        <div style="display: table-cell;">
+            <input type="radio" name="ground_material" value="ground_dirt" id="ground_dirt" checked>
+            <label for="ground_dirt">Dirt</label>
+            <br />
+            <input type="radio" name="ground_material" value="ground_grass" id="ground_grass">
+            <label for="ground_grass">Grass</label>
+            <br />
+            <input type="radio" name="ground_material" value="ground_rock" id="ground_rock">
+            <label for="ground_rock">Rocky</label>
+            <br />
+            <input type="radio" name="ground_material" value="ground_water" id="ground_water">
+            <label for="ground_water">Water</label>
+            <br />
+            <input type="radio" name="ground_material" value="ground_tile" id="ground_tile">
+            <label for="ground_tile">Tile/Finished Stone</label>
+            <br />
+            <input type="radio" name="ground_material" value="ground_wood" id="ground_wood">
+            <label for="ground_wood">Wooden</label>
+            <br />
+            <input type="radio" name="ground_material" value="ground_void" id="ground_void">
+            <label for="ground_void">Solid/nonvisible</label>
         </div>
     </div>
 </div>
