@@ -16,6 +16,39 @@
 </head>
 
 <script type="text/javascript">
+//temporary object for dynamic generation of one of the sub-palettes
+const actor_art={
+    "Hans": {
+        "icon":"H",
+        "index":"H",
+        "unique":true,
+        "type":"PC",
+    },
+    "Korias": {
+        "icon":"K",
+        "index":"K",
+        "unique":true,
+        "type":"PC",
+    },
+    "Toman": {
+        "icon":"T",
+        "index":"T",
+        "unique":true,
+        "type":"PC",
+    },
+    "Iknik": {
+        "icon":"I",
+        "index":"I",
+        "unique":true,
+        "type":"PC",
+    },
+    "Wasp Swarm": {
+        "icon":"w",
+        "index":"w",
+        "unique":false,
+        "type":"Monster",
+    },
+};
 //some global settings for the ascii palette
 const empty_tile='█';
 const map_mapping={
@@ -38,7 +71,7 @@ const map_mapping={
         "P": ["P"],
         "M": ["M"],
     }
-}
+};
 
 //palette state object
 let ps={}; 
@@ -56,8 +89,37 @@ ps.cols=0;
 //handle click on wall action
 ps.dirty_wall=false;
 
-
+function assemble_palette() {
+    /*
+    <input type="radio" name="actor_token" value="actor_player" id="actor_player" checked>
+    <label for="actor_player">Player Character</label>
+    <br />
+    <input type="radio" name="actor_token" value="actor_monster" id="actor_monster">
+    <label for="actor_monster">Monster</label>
+    <br />
+    #actor_brush_select
+    */
+    let actor_keys=Object.keys(actor_art);
+    actor_keys.forEach((actor_key)=> {
+        let this_index=actor_art[actor_key].index;
+        let this_icon=actor_art[actor_key].icon;
+        map_mapping.actor=Object.assign({[this_index]:[this_icon]},map_mapping.actor);
+        let input_check=document.createElement("input");
+        input_check.type="radio";
+        input_check.name="actor_token";
+        input_check.value="actor_"+actor_key;
+        input_check.id="actor_"+actor_key;
+        let input_label=document.createElement("label");
+        input_label.setAttribute("for",input_check.id);
+        input_label.innerHTML=actor_key;
+        document.getElementById("actor_brush_select").appendChild(input_check);
+        document.getElementById("actor_brush_select").appendChild(input_label);
+        input_br=document.createElement("br");
+        document.getElementById("actor_brush_select").appendChild(input_br);
+    });
+}
 function synthesize_map() {
+    console.log(map_mapping);
     //create a combined map by merging all layers
     let line="";
     let update_clip="";
@@ -212,14 +274,17 @@ function current_marker() {
                 }
             } 
             console.log("current_marker: "+picked+ " selected");
-            switch(picked) {
+            //attempt to find the picked in the keys
+            picked=picked.replace("actor_","");
+            rval=actor_art[picked].index;
+            /*switch(picked) {
                 case "actor_player":
                     rval='P';
                     break;
                 case "actor_monster":
                     rval='M';
                     break; 
-            }
+            }*/
             break;
     }
     return rval;
@@ -352,6 +417,8 @@ function canvas_mouseenter_event(event) {
     }
 }
 function fresh_map() {
+    //palettes
+    assemble_palette();
     //get input
     ps.rows=parseInt(document.getElementById("num_rows").value,10);
     ps.cols=parseInt(document.getElementById("num_cols").value,10);
@@ -447,13 +514,8 @@ function update_square(r1, r2, c1, c2, map_box) {
 <div style="visibility: hidden; display:none;" id="brush_shelf">
 <!-- palette for actors -->
     <div style="display: table-row;" id="actor_brush">
-        <div style="display: table-cell;">
-            <input type="radio" name="actor_token" value="actor_player" id="actor_player" checked>
-            <label for="actor_player">Player Character</label>
-            <br />
-            <input type="radio" name="actor_token" value="actor_monster" id="actor_monster">
-            <label for="actor_monster">Monster</label>
-            <br />
+        <div style="display: table-cell;" id="actor_brush_select">
+            
         </div>
     </div>
     <!-- palette for walls -->
