@@ -68,8 +68,6 @@ const map_mapping={
         "D": ["∩"],
     },
     "actor": {
-        "P": ["P"],
-        "M": ["M"],
     }
 };
 
@@ -91,14 +89,9 @@ ps.dirty_wall=false;
 
 function assemble_palette() {
     /*
-    <input type="radio" name="actor_token" value="actor_player" id="actor_player" checked>
-    <label for="actor_player">Player Character</label>
-    <br />
-    <input type="radio" name="actor_token" value="actor_monster" id="actor_monster">
-    <label for="actor_monster">Monster</label>
-    <br />
     #actor_brush_select
     */
+    let firstTag=true;
     let actor_keys=Object.keys(actor_art);
     actor_keys.forEach((actor_key)=> {
         let this_index=actor_art[actor_key].index;
@@ -109,6 +102,10 @@ function assemble_palette() {
         input_check.name="actor_token";
         input_check.value="actor_"+actor_key;
         input_check.id="actor_"+actor_key;
+        if (firstTag) {
+            input_check.checked=true;
+            firstTag=false;
+        }
         let input_label=document.createElement("label");
         input_label.setAttribute("for",input_check.id);
         input_label.innerHTML=actor_key;
@@ -566,20 +563,21 @@ function update_square(r1, r2, c1, c2, map_box) {
 
 <p></p>
 <!-- debug -->
+<div style="visibility: hidden; display:none;">
 State:<span id="state"></span>
 X:<span id="col_display"></span>
 Y:<span id="row_display"></span>
 <br />
+</div>
 <!-- create map -->
 <label for="num_rows">Rows:</label>
 <input type="number" id="num_rows" name="Rows">
 <label for="num_cols">Columns:</label>
 <input type="number" id="num_cols" name="Cols">
 <button onclick="fresh_map()">Create New Map</button> 
-<button onclick="synthesize_map()">Merge Map</button>
 <br />
 <!--holder maps-->
-<div style="display: table;">
+<div style="visibility: hidden; display: table; display:none;">
     <div style="display: table-row;"></div>
         <div class="temp_map" id="temp_map" style="display: table-cell;"></div>
         <div style="width: 10px; display: table-cell;"></div>
