@@ -114,6 +114,8 @@ function assemble_palette() {
         input_br=document.createElement("br");
         document.getElementById("actor_brush_select").appendChild(input_br);
     });
+    //move button to the bottom
+    document.getElementById("actor_brush_select").append(document.getElementById("add_actor"));
 }
 function synthesize_map() {
     console.log(map_mapping);
@@ -453,6 +455,9 @@ function fresh_map() {
     }
     //handling the situation where the mouse is let go outside the canvas
     document.body.addEventListener("mouseup",function(even) {ps.box_draw=false;ps.line_draw=false});
+    //make the copypasta section the right size
+    document.getElementById("clip_area").rows=ps.rows+1;
+    document.getElementById("clip_area").cols=ps.cols+1;
 }
 function update_square(r1, r2, c1, c2, map_box) {
     //swap if first is larger
@@ -512,7 +517,7 @@ function update_square(r1, r2, c1, c2, map_box) {
 <!-- palette for actors -->
     <div style="display: table-row;" id="actor_brush">
         <div style="display: table-cell;" id="actor_brush_select">
-            
+            <button id="add_actor" onclick="">Add</button>
         </div>
     </div>
     <!-- palette for walls -->
