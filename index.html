@@ -94,6 +94,13 @@ function assemble_palette() {
     let firstTag=true;
     let actor_keys=Object.keys(actor_art);
     actor_keys.forEach((actor_key)=> {
+        let row_div=document.createElement("div");
+        row_div.style.display="table-row";
+        let left_div=document.createElement("div");
+        left_div.style.display="table-cell";
+        let right_div=document.createElement("div");
+        right_div.style.display="table-cell";
+        right_div.style.textAlign="right";
         let this_index=actor_art[actor_key].index;
         let this_icon=actor_art[actor_key].icon;
         map_mapping.actor=Object.assign({[this_index]:[this_icon]},map_mapping.actor);
@@ -109,10 +116,18 @@ function assemble_palette() {
         let input_label=document.createElement("label");
         input_label.setAttribute("for",input_check.id);
         input_label.innerHTML=actor_key;
-        document.getElementById("actor_brush_select").appendChild(input_check);
-        document.getElementById("actor_brush_select").appendChild(input_label);
+        left_div.appendChild(input_check);
+        left_div.appendChild(input_label);
+        input_remove=document.createElement("button");
+        input_remove.id="remove_"+actor_key;
+        input_remove.textContent="-";
+        right_div.innerHTML="&nbsp;";
+        right_div.appendChild(input_remove);
+        row_div.append(left_div);
+        row_div.append(right_div);
         input_br=document.createElement("br");
-        document.getElementById("actor_brush_select").appendChild(input_br);
+        row_div.append(input_br);
+        document.getElementById("actor_brush_select").append(row_div);
     });
     //move button to the bottom
     document.getElementById("actor_brush_select").append(document.getElementById("add_actor"));
@@ -500,16 +515,17 @@ function update_square(r1, r2, c1, c2, map_box) {
 <div style="width: 100%; display:table;">
     <div style="display: table-row;">
         <div class="map_canvas" id="map_canvas" style="display: table-cell; width: 5%; margin:10;"></div>
-        <div class="drawing_palette" style="display: table-cell; width: auto; float:left;margin:10;"></div>
-        <div style="display: table-row;">
-            <div class="palette_select" style="display: table-cell;">
-                <button onclick="edit_ground()">Ground</button><br />
-                <button onclick="edit_wall()">Walls</button><br />
-                <button onclick="edit_actor()">Actors</button><br />
+        <div>
+            <div style="display: table-row;">
+                <div class="palette_select" style="display: table-cell;">
+                    <button onclick="edit_ground()">Ground</button>
+                    <button onclick="edit_wall()">Walls</button>
+                    <button onclick="edit_actor()">Actors</button>
+                </div>
             </div>
-        </div>
-        <div style="display: table-row; visibility: visible;" id="active_brush">
+            <div style="display: table-row; visibility: visible;" id="active_brush">
 
+            </div>
         </div>
     </div>
 </div>
