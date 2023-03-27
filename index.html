@@ -93,7 +93,11 @@ function assemble_palette() {
     */
     let firstTag=true;
     let actor_keys=Object.keys(actor_art);
+    button_element=document.getElementById("add_actor");
+    document.getElementById("actor_brush_select").replaceChildren();
+    document.getElementById("actor_brush_select").append(button_element);
     actor_keys.forEach((actor_key)=> {
+        console.log("adding actor key: "+actor_key);
         let row_div=document.createElement("div");
         row_div.style.display="table-row";
         let left_div=document.createElement("div");
