@@ -17,7 +17,7 @@
 
 <script type="text/javascript">
 //temporary object for dynamic generation of one of the sub-palettes
-const actor_art={
+let actor_art={
     "Hans": {
         "icon":"H",
         "index":"H",
@@ -86,18 +86,25 @@ ps.rows=0;
 ps.cols=0;
 //handle click on wall action
 ps.dirty_wall=false;
-
+function deleteActorEntry(event) {
+    let actor_key = event.target.id.split("remove_")[1];
+    delete actor_art[actor_key];
+    assemble_palette();
+}
 function assemble_palette() {
     /*
     #actor_brush_select
     */
     let firstTag=true;
     let actor_keys=Object.keys(actor_art);
+    //replace children will remove all elements, so we pre-emptively grab the button we want to keep
     button_element=document.getElementById("add_actor");
+    //remove all elements from actor_Brush_Select
     document.getElementById("actor_brush_select").replaceChildren();
-    document.getElementById("actor_brush_select").append(button_element);
+    //loop through all actor entries
     actor_keys.forEach((actor_key)=> {
-        console.log("adding actor key: "+actor_key);
+        //console.log("adding actor key: "+actor_key);
+        //we have a radio button, the label for that button, and a 'remove' button.
         let row_div=document.createElement("div");
         row_div.style.display="table-row";
         let left_div=document.createElement("div");
@@ -107,12 +114,15 @@ function assemble_palette() {
         right_div.style.textAlign="right";
         let this_index=actor_art[actor_key].index;
         let this_icon=actor_art[actor_key].icon;
+        //our lookup function uses the map_mapping object
         map_mapping.actor=Object.assign({[this_index]:[this_icon]},map_mapping.actor);
+        //radio button
         let input_check=document.createElement("input");
         input_check.type="radio";
         input_check.name="actor_token";
         input_check.value="actor_"+actor_key;
         input_check.id="actor_"+actor_key;
+        //we pre-tic the first entry
         if (firstTag) {
             input_check.checked=true;
             firstTag=false;
@@ -125,6 +135,7 @@ function assemble_palette() {
         input_remove=document.createElement("button");
         input_remove.id="remove_"+actor_key;
         input_remove.textContent="-";
+        input_remove.addEventListener('click',deleteActorEntry);
         right_div.innerHTML="&nbsp;";
         right_div.appendChild(input_remove);
         row_div.append(left_div);
@@ -133,8 +144,8 @@ function assemble_palette() {
         row_div.append(input_br);
         document.getElementById("actor_brush_select").append(row_div);
     });
-    //move button to the bottom
-    document.getElementById("actor_brush_select").append(document.getElementById("add_actor"));
+    //add button back
+    document.getElementById("actor_brush_select").append(button_element);
 }
 function synthesize_map() {
     console.log(map_mapping);
