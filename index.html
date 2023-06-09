@@ -98,7 +98,7 @@ function assemble_palette() {
     let firstTag=true;
     let actor_keys=Object.keys(actor_art);
     //replace children will remove all elements, so we pre-emptively grab the button we want to keep
-    button_element=document.getElementById("add_actor");
+    //button_element=document.getElementById("add_actor");
     //remove all elements from actor_Brush_Select
     document.getElementById("actor_brush_select").replaceChildren();
     //loop through all actor entries
@@ -145,7 +145,7 @@ function assemble_palette() {
         document.getElementById("actor_brush_select").append(row_div);
     });
     //add button back
-    document.getElementById("actor_brush_select").append(button_element);
+    //document.getElementById("actor_brush_select").append(button_element);
 }
 function synthesize_map() {
     console.log(map_mapping);
@@ -522,6 +522,28 @@ function update_square(r1, r2, c1, c2, map_box) {
         }
     }
 }
+function add_actor() {
+    /*
+    "Hans": {
+        "icon":"H",
+        "index":"H",
+        "unique":true,
+        "type":"PC",
+    },
+    */
+    const new_actor_index=document.getElementById("add_actor_symbol").value;
+    const new_actor_label=document.getElementById("add_actor_name").value;
+    const new_actor_pc=document.getElementById("add_actor_pc").value;
+    console.log(new_actor_index);
+    console.log(new_actor_label);
+    actor_art[new_actor_label]={
+        "icon":new_actor_index,
+        "index":new_actor_index,
+        "unique":new_actor_pc ? "true":"false",
+        "type":new_actor_pc ? "PC":"monster",
+    };
+    assemble_palette();
+}
 </script>
 
 
@@ -545,10 +567,32 @@ function update_square(r1, r2, c1, c2, map_box) {
     </div>
 </div>
 <div style="visibility: hidden; display:none;" id="brush_shelf">
-<!-- palette for actors -->
+    <!-- palette for actors -->
+    
     <div style="display: table-row;" id="actor_brush">
-        <div style="display: table-cell;" id="actor_brush_select">
-            <button id="add_actor" onclick="">Add</button>
+        <!-- This div and the one following it should show up one above the other.
+    This first div is empty, and will be added by populating from the map's
+    actor list.-->
+        <div style="display: table-row;" id="actor_brush_select">
+            
+        </div>
+        <!-- the second div is the 'add an actor' functionality.-->
+        <div style="display: table-row;" id="add_actor_area">
+            - Add New Actor -
+            <br />
+            <label for="add_actor_name">Name:</label>
+            <input type="text" id="add_actor_name" name="Name of New Actor" size="20">
+            <br />
+            <label for="add_actor_symbol">Label:</label>
+            <input type="text" id="add_actor_symbol" name="Symbol" size="3" maxlength="1">
+            <br />
+            <input type="radio" id="add_actor_pc" name="Actor Type" value="PC" checked>
+            <label for="add_actor_pc">PC</label>
+            <br />
+            <input type="radio" id="add_actor_mob" name="Actor Type" value="monster">
+            <label for="add_actor_mob">monster</label>
+            <br />
+            <button id="add_actor" onclick="add_actor()">Add</button>
         </div>
     </div>
     <!-- palette for walls -->
