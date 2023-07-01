@@ -152,11 +152,19 @@ function synthesize_map() {
     //create a combined map by merging all layers
     let line="";
     let update_clip="";
+    //add column markers
+    line=line+"  ";
+    for (let header_ii=0; header_ii<ps.cols; header_ii++) {
+        line=line+String.fromCharCode(65+(header_ii%26));
+    }
+    update_clip=update_clip+line;
     let symbol_set=null;
     const wall_symbol="╬";
     document.getElementById("clip_area").textContent="";
     for (let rr=0; rr<ps.rows; rr+=1) {
         line="";
+        //row marker
+        line=line+('00'+(rr+1)).slice(-2);
         for (let cc=0; cc<ps.cols; cc+=1) {
             let coord_tail="_"+rr+"_"+cc;
             ground_layer=document.getElementById("ground_map"+coord_tail).textContent;
@@ -185,11 +193,7 @@ function synthesize_map() {
             document.getElementById("map_canvas"+coord_tail).textContent=paint;
             line=line+paint;
         }
-        if (rr===0) {
-            update_clip=line;
-        } else {
-            update_clip=update_clip+"\n"+line;
-        }
+        update_clip=update_clip+"\n"+line;
     }
     document.getElementById("clip_area").value=update_clip;
 }
@@ -486,8 +490,8 @@ function fresh_map() {
     //handling the situation where the mouse is let go outside the canvas
     document.body.addEventListener("mouseup",function(even) {ps.box_draw=false;ps.line_draw=false});
     //make the copypasta section the right size
-    document.getElementById("clip_area").rows=ps.rows+1;
-    document.getElementById("clip_area").cols=ps.cols+1;
+    document.getElementById("clip_area").rows=ps.rows+1+1;
+    document.getElementById("clip_area").cols=ps.cols+1+2;
 }
 function update_square(r1, r2, c1, c2, map_box) {
     //swap if first is larger
@@ -551,7 +555,9 @@ function add_actor() {
 <p></p>
 <div style="width: 100%; display:table;">
     <div style="display: table-row;">
-        <div class="map_canvas" id="map_canvas" style="display: table-cell; width: 5%; margin:10;"></div>
+        <div class="map_canvas" id="map_canvas" style="display: table-cell; width: 5%; margin:10;">
+            <!--map where painting happens goes here, generated dynamically-->
+        </div>
         <div>
             <div style="display: table-row;">
                 <div class="palette_select" style="display: table-cell;">
@@ -567,6 +573,7 @@ function add_actor() {
     </div>
 </div>
 <div style="visibility: hidden; display:none;" id="brush_shelf">
+    <!-- hidden div that just holds sub-divs that are moved into the active brush div-->
     <!-- palette for actors -->
     
     <div style="display: table-row;" id="actor_brush">
