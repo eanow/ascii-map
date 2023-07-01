@@ -42,11 +42,11 @@ let actor_art={
         "unique":true,
         "type":"PC",
     },
-    "Wasp Swarm": {
-        "icon":"w",
-        "index":"w",
-        "unique":false,
-        "type":"Monster",
+    "Roknar": {
+        "icon":"R",
+        "index":"R",
+        "unique":true,
+        "type":"PC",
     },
 };
 //some global settings for the ascii palette
@@ -147,6 +147,14 @@ function assemble_palette() {
     //add button back
     //document.getElementById("actor_brush_select").append(button_element);
 }
+function generate_legend() {
+    //returns string for copy+paste area with legend
+    legend="";
+    for (const actor of Object.keys(actor_art)) {
+        legend=legend+"\n"+actor_art[actor].icon+" "+actor;
+    }
+    return legend;
+}
 function synthesize_map() {
     console.log(map_mapping);
     //create a combined map by merging all layers
@@ -195,6 +203,7 @@ function synthesize_map() {
         }
         update_clip=update_clip+"\n"+line;
     }
+    update_clip=update_clip+"\n"+generate_legend();
     document.getElementById("clip_area").value=update_clip;
 }
 
@@ -490,7 +499,7 @@ function fresh_map() {
     //handling the situation where the mouse is let go outside the canvas
     document.body.addEventListener("mouseup",function(even) {ps.box_draw=false;ps.line_draw=false});
     //make the copypasta section the right size
-    document.getElementById("clip_area").rows=ps.rows+1+1;
+    document.getElementById("clip_area").rows=ps.rows+1+1+Object.keys(actor_art).length;
     document.getElementById("clip_area").cols=ps.cols+1+2;
 }
 function update_square(r1, r2, c1, c2, map_box) {
